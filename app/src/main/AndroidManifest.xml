@@ -10,11 +10,19 @@
         <activity
             android:name=".Activity.FeedListActivity"
             android:label="@string/app_name" >
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>-->
+        </activity>
+        <activity
+            android:name=".Activity.CollectionActivity"
+            android:label="@string/title_activity_collection"
+	        android:theme="@style/Theme.AppCompat.Light">
+	        <intent-filter>
+		        <action android:name="android.intent.action.MAIN" />
+		        <category android:name="android.intent.category.LAUNCHER" />
+	        </intent-filter>
         </activity>
     </application>
 
