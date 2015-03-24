@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">RssViewer</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="hello_world">Hello world 101!</string>
     <string name="action_settings">Settings</string>
 
 </resources>
