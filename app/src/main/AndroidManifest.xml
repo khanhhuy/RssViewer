@@ -3,26 +3,37 @@
     package="assignment.rssviewer" >
 
     <application
+        android:name=".service.RssApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".activity.FeedListActivity"
             android:label="@string/app_name" >
-            <!--<intent-filter>
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
         <activity
             android:name=".activity.CollectionActivity"
-            android:label="@string/title_activity_collection"
-	        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            android:label="@string/title_activity_collection">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.CategoryActivity"
+            android:label="@string/title_activity_category">
 	        <intent-filter>
-		        <action android:name="android.intent.action.MAIN" />
-		        <category android:name="android.intent.category.LAUNCHER" />
+		        <action android:name="android.intent.action.VIEW"/>
 	        </intent-filter>
+	        <meta-data android:name="android.support.PARENT_ACTIVITY"
+	                   android:value=".activity.CollectionActivity"/>
         </activity>
     </application>
 
