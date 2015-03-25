@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 import assignment.rssviewer.model.Category;
@@ -20,16 +21,16 @@ public class DataService
             instance = new DataService();
     }
 
-    public static HashMap<Integer, Category> getAllCategories()
+    public static LinkedHashMap<Integer, Category> getAllCategories()
     {
         if (instance != null)
             return instance.getAllCategoriesInternal();
-        else return new HashMap<>();
+        else return new LinkedHashMap<>();
     }
 
-    private HashMap<Integer, Category> getAllCategoriesInternal()
+    private LinkedHashMap<Integer, Category> getAllCategoriesInternal()
     {
-        HashMap<Integer, Category> categories = new HashMap<>();
+        LinkedHashMap<Integer, Category> categories = new LinkedHashMap<>();
 
         for (int i = 0; i < 3; i++)
         {

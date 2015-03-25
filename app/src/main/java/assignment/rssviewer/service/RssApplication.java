@@ -5,6 +5,7 @@ import android.app.Application;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -15,7 +16,7 @@ import assignment.rssviewer.model.Category;
  */
 public class RssApplication extends Application
 {
-    private HashMap<Integer, Category> categories;
+    private LinkedHashMap<Integer, Category> categories;
     private Random random = new Random();
 
     @Override

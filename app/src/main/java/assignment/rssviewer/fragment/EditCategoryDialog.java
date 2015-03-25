@@ -1,6 +1,5 @@
 package assignment.rssviewer.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -21,7 +20,12 @@ public class EditCategoryDialog extends DialogFragment
     private String content;
     private boolean isNew;
     private int id;
-    private NoticeDialogLisnener lisener;
+    private OnClosedListener listener;
+
+    public void setOnClosedListener(OnClosedListener value)
+    {
+        this.listener = value;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
@@ -39,8 +43,8 @@ public class EditCategoryDialog extends DialogFragment
                    @Override
                    public void onClick(DialogInterface dialog, int which)
                    {
-                       if (lisener != null)
-                           lisener.onPositiveClicked(isNew, id, txtContent.getText().toString());
+                       if (listener != null)
+                           listener.onAccepted(isNew, id, txtContent.getText().toString());
                    }
                })
                .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
@@ -48,8 +52,8 @@ public class EditCategoryDialog extends DialogFragment
                    @Override
                    public void onClick(DialogInterface dialog, int which)
                    {
-                       if (lisener != null)
-                           lisener.onNegativeClicked(isNew, id, txtContent.getText().toString());
+                       if (listener != null)
+                           listener.onCanceled(isNew, id, txtContent.getText().toString());
                    }
                });
 
@@ -65,23 +69,9 @@ public class EditCategoryDialog extends DialogFragment
         id = args.getInt("id");
     }
 
-    @Override
-    public void onAttach(Activity activity)
+    public interface OnClosedListener
     {
-        super.onAttach(activity);
-        try
-        {
-            lisener = (NoticeDialogLisnener)activity;
-        }
-        catch (ClassCastException e)
-        {
-            lisener = null;
-        }
-    }
-
-    public interface NoticeDialogLisnener
-    {
-        public void onPositiveClicked(boolean isNew, int id, String content);
-        public void onNegativeClicked(boolean isNew, int id, String content);
+        public void onAccepted(boolean isNew, int id, String content);
+        public void onCanceled(boolean isNew, int id, String content);
     }
 }

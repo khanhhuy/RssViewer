@@ -1,10 +1,9 @@
 package assignment.rssviewer.activity;
 
-import android.app.Notification;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.view.ActionMode;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,6 +11,7 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import assignment.rssviewer.R;
@@ -20,18 +20,27 @@ import assignment.rssviewer.model.Category;
 import assignment.rssviewer.service.RssApplication;
 
 public class CollectionActivity extends ActionBarActivity
-    implements EditCategoryDialog.NoticeDialogLisnener
 {
     private RssApplication application;
     private ListView lvCategories;
+    private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
 
-    private AbsListView.MultiChoiceModeListener multiChoiceModeListener = new AbsListView.MultiChoiceModeListener()
+    private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
         @Override
         public void onItemCheckedStateChanged(android.view.ActionMode mode, int position, long id, boolean checked)
         {
             MenuItem menuItem = mode.getMenu().findItem(R.id.action_edit);
-            menuItem.setEnabled(lvCategories.getCheckedItemCount() == 1);
+            if (lvCategories.getCheckedItemCount() == 1)
+            {
+                menuItem.setEnabled(true);
+                menuItem.getIcon().setAlpha(255);
+            }
+            else
+            {
+                menuItem.setEnabled(false);
+                menuItem.getIcon().setAlpha(130);
+            }
         }
 
         @Override
@@ -56,7 +65,8 @@ public class CollectionActivity extends ActionBarActivity
                 case R.id.action_remove:
                     return true;
                 case R.id.action_edit:
-                    editCategory(lvCategories.getCheckedItemPosition());
+                    editCategory(getFirstSelectedPosition());
+                    mode.finish();
                     return true;
                 default:
                     return false;
@@ -65,6 +75,31 @@ public class CollectionActivity extends ActionBarActivity
 
         @Override
         public void onDestroyActionMode(android.view.ActionMode mode)
+        {
+        }
+    };
+
+    private EditCategoryDialog.OnClosedListener editCategoryOnClosedListener = new EditCategoryDialog.OnClosedListener()
+    {
+        @Override
+        public void onAccepted(boolean isNew, int id, String content)
+        {
+            Category category;
+            if (!isNew)
+            {
+                category = application.getCategoryById(id);
+                category.name = content;
+                ((BaseAdapter)lvCategories.getAdapter()).notifyDataSetChanged();
+            }
+            else
+            {
+                category = application.createNewCategory(content);
+                showCategoryView(category.id);
+            }
+        }
+
+        @Override
+        public void onCanceled(boolean isNew, int id, String content)
         {
 
         }
@@ -78,7 +113,7 @@ public class CollectionActivity extends ActionBarActivity
 
         application = (RssApplication) getApplication();
         lvCategories = (ListView) findViewById(R.id.lvCategories);
-        ArrayAdapter<Category> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, application.getCategories());
+        ArrayAdapter<Category> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, application.getCategories());
         lvCategories.setAdapter(adapter);
 
         lvCategories.setOnItemClickListener(new AdapterView.OnItemClickListener()
@@ -92,7 +127,9 @@ public class CollectionActivity extends ActionBarActivity
         });
 
         lvCategories.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        lvCategories.setMultiChoiceModeListener(multiChoiceModeListener);
+        lvCategories.setMultiChoiceModeListener(categoriesSelectionListener);
+
+        editCategoryDialog.setOnClosedListener(editCategoryOnClosedListener);
     }
 
     @Override
@@ -131,7 +168,6 @@ public class CollectionActivity extends ActionBarActivity
 
     private void createNewCategory()
     {
-        EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
         Bundle bundle = new Bundle();
         bundle.putString("title", "New Category");
         bundle.putString("content", "");
@@ -144,7 +180,6 @@ public class CollectionActivity extends ActionBarActivity
     private void editCategory(int position)
     {
         Category category = (Category)lvCategories.getAdapter().getItem(position);
-        EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
         Bundle bundle = new Bundle();
         bundle.putString("title", "Edit Category");
         bundle.putString("content", category.name);
@@ -154,24 +189,15 @@ public class CollectionActivity extends ActionBarActivity
         editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
     }
 
-    @Override
-    public void onPositiveClicked(boolean isNew, int id, String content)
+    private int getFirstSelectedPosition()
     {
-        Category category;
-        if (!isNew)
+        if (lvCategories != null)
         {
-            category = application.getCategoryById(id);
-            category.name = content;
+            SparseBooleanArray pos = lvCategories.getCheckedItemPositions();
+            for (int i = 0; i < pos.size(); i++)
+                if (pos.valueAt(i))
+                    return pos.keyAt(i);
         }
-        else
-        {
-            category = application.createNewCategory(content);
-        }
-        showCategoryView(category.id);
-    }
-
-    @Override
-    public void onNegativeClicked(boolean isNew, int id, String content)
-    {
+        return -1;
     }
 }
