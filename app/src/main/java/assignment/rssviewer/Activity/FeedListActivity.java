@@ -1,4 +1,4 @@
-package assignment.rssviewer.Activity;
+package assignment.rssviewer.activity;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;

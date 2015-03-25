@@ -10,6 +10,6 @@
 
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_source_manager">SourceManagerActivity</string>
-    <string name="title_activity_collection">CollectionActivity</string>
+    <string name="title_activity_collection">My Collection</string>
 
 </resources>
