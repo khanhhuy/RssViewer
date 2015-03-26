@@ -1,6 +1,7 @@
 package assignment.rssviewer.lvadapter;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -8,17 +9,17 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import assignment.rssviewer.R;
+import assignment.rssviewer.model.Category;
 import assignment.rssviewer.model.RssSource;
 
 /**
- * Created by Prozacs on 25/03/2015.
+ * Created by Prozacs on 26/03/2015.
  */
-public class SourceAdapter extends ArrayAdapter<RssSource>
+public class CategoryAdapter extends ArrayAdapter<Category>
 {
-    public SourceAdapter(Context context, List<RssSource> rssSources)
+    public CategoryAdapter(Context context, List<Category> categories)
     {
-        super(context, R.layout.source_list_item_layout, android.R.id.text1, rssSources);
+        super(context, android.R.layout.simple_list_item_activated_2, android.R.id.text1, categories);
     }
 
     @Override
@@ -28,10 +29,12 @@ public class SourceAdapter extends ArrayAdapter<RssSource>
         TextView text1 = (TextView) view.findViewById(android.R.id.text1);
         TextView text2 = (TextView) view.findViewById(android.R.id.text2);
 
-        RssSource source = super.getItem(position);
+        Category source = super.getItem(position);
         text1.setText(source.name);
-        text2.setText(source.sourceUri.toString());
+        text2.setText("RSS Sources: " + source.rssSources.size());
 
         return view;
     }
+
+
 }

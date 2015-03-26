@@ -10,12 +10,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import assignment.rssviewer.R;
+import assignment.rssviewer.fragment.ConfirmDialog;
 import assignment.rssviewer.fragment.EditCategoryDialog;
+import assignment.rssviewer.lvadapter.CategoryAdapter;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.service.RssApplication;
 
@@ -24,6 +28,7 @@ public class CollectionActivity extends ActionBarActivity
     private RssApplication application;
     private ListView lvCategories;
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
+    private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
 
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
@@ -63,9 +68,11 @@ public class CollectionActivity extends ActionBarActivity
             switch (item.getItemId())
             {
                 case R.id.action_remove:
+                    removeCategories();
+                    mode.finish();
                     return true;
                 case R.id.action_edit:
-                    editCategory(getFirstSelectedPosition());
+                    editCategory(getFirstSelectedCategory());
                     mode.finish();
                     return true;
                 default:
@@ -105,7 +112,21 @@ public class CollectionActivity extends ActionBarActivity
         }
     };
 
-    @Override
+    private ConfirmDialog.OnClosedListener confirmDeletionOnClosedListener = new ConfirmDialog.OnClosedListener()
+    {
+        @Override
+        public void onAccepted()
+        {
+            application.removeCategories(getSelectedCategories());
+            lvCategories.setAdapter(new CategoryAdapter(CollectionActivity.this, application.getCategories()));
+        }
+
+        @Override
+        public void onCanceled()
+        {
+        }
+    };
+
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
@@ -113,8 +134,7 @@ public class CollectionActivity extends ActionBarActivity
 
         application = (RssApplication) getApplication();
         lvCategories = (ListView) findViewById(R.id.lvCategories);
-        ArrayAdapter<Category> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_activated_1, application.getCategories());
-        lvCategories.setAdapter(adapter);
+        lvCategories.setAdapter(new CategoryAdapter(this, application.getCategories()));
 
         lvCategories.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
@@ -130,6 +150,7 @@ public class CollectionActivity extends ActionBarActivity
         lvCategories.setMultiChoiceModeListener(categoriesSelectionListener);
 
         editCategoryDialog.setOnClosedListener(editCategoryOnClosedListener);
+        confirmDeletionDialog.setOnClosedListener(confirmDeletionOnClosedListener);
     }
 
     @Override
@@ -177,27 +198,69 @@ public class CollectionActivity extends ActionBarActivity
         editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
     }
 
-    private void editCategory(int position)
+    private void editCategory(Category category)
     {
-        Category category = (Category)lvCategories.getAdapter().getItem(position);
-        Bundle bundle = new Bundle();
-        bundle.putString("title", "Edit Category");
-        bundle.putString("content", category.name);
-        bundle.putBoolean("isNew", false);
-        bundle.putInt("id", category.id);
-        editCategoryDialog.setArguments(bundle);
-        editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
+        if (category != null)
+        {
+            Bundle bundle = new Bundle();
+            bundle.putString("title", "Edit Category");
+            bundle.putString("content", category.name);
+            bundle.putBoolean("isNew", false);
+            bundle.putInt("id", category.id);
+            editCategoryDialog.setArguments(bundle);
+            editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
+        }
     }
 
-    private int getFirstSelectedPosition()
+    private void removeCategories()
+    {
+        Bundle bundle = new Bundle();
+        bundle.putString("title", "Confirm Deletion");
+        bundle.putString("content", "Are you sure you want to remove these categories?");
+        confirmDeletionDialog.setArguments(bundle);
+        confirmDeletionDialog.show(getFragmentManager(), "confirmDeletionDialog");
+    }
+
+    private Category getFirstSelectedCategory()
     {
         if (lvCategories != null)
         {
-            SparseBooleanArray pos = lvCategories.getCheckedItemPositions();
-            for (int i = 0; i < pos.size(); i++)
-                if (pos.valueAt(i))
-                    return pos.keyAt(i);
+            SparseBooleanArray checkedPositions = lvCategories.getCheckedItemPositions();
+            int pos = -1;
+            for (int i = 0; i < lvCategories.getCount(); i++)
+                if (checkedPositions.get(i))
+                {
+                    pos = i;
+                    break;
+                }
+
+            if (pos >= 0)
+            {
+                return (Category)lvCategories.getAdapter().getItem(pos);
+            }
         }
-        return -1;
+        return null;
+    }
+
+    private List<Category> getSelectedCategories()
+    {
+        List<Category> selectedCategories = new ArrayList<>();
+
+        if (lvCategories != null)
+        {
+            SparseBooleanArray checkedPositions = lvCategories.getCheckedItemPositions();
+            for (int i = 0; i < lvCategories.getCount(); i++)
+            {
+                if (checkedPositions.valueAt(i))
+                {
+                    int pos = checkedPositions.keyAt(i);
+                    Category c = (Category) lvCategories.getAdapter().getItem(pos);
+                    selectedCategories.add(c);
+                }
+                else break;
+            }
+        }
+
+        return selectedCategories;
     }
 }

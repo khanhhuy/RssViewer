@@ -34,7 +34,7 @@ public class RssApplication extends Application
 
     public List<Category> getCategories()
     {
-        return Collections.unmodifiableList(new ArrayList<>(categories.values()));
+        return new ArrayList<>(categories.values());
     }
 
     public Category createNewCategory(String name)
@@ -54,5 +54,25 @@ public class RssApplication extends Application
         categories.put(id, category);
 
         return category;
+    }
+
+    public void removeCategory(Category c)
+    {
+        this.removeCategory(c, true);
+    }
+
+    private void removeCategory(Category c, boolean saveToDb)
+    {
+        categories.remove(c.id);
+        // TODO: if saveToDb == true -> save changes to database
+    }
+
+    public void removeCategories(List<Category> categoriesToRemove)
+    {
+        for (Category c : categoriesToRemove)
+        {
+            removeCategory(c, false);
+        }
+        // TODO: code to save changes to database here
     }
 }
