@@ -3,14 +3,16 @@
 
     <string name="app_name">RssViewer</string>
     <string name="hello_world">Hello world 101!</string>
-
     <string name="action_settings">Settings</string>
     <string name="action_search">Search</string>
-	<string name="action_new">New</string>
-	<string name="action_edit">Edit</string>
-
+    <string name="action_new">New</string>
+    <string name="action_edit">Edit</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_source_manager">SourceManagerActivity</string>
     <string name="title_activity_collection">My Collection</string>
+    <string name="drawer_title_allcategory">All</string>
+    <string name="drawer_title_library">My Library</string>
+    <string name="drawer_title_settings">Settings</string>
+    <string name="title_activity_feed_list">FeedListActivity</string>
 
 </resources>

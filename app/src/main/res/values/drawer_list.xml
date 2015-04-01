@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="drawer_list">
-        <item>All</item>
-        <item>My library</item>
-        <item>Settings</item>
-        <item>Logout</item>
-    </string-array>
+   <string-array name="title">
+       <item>@string/drawer_title_allcategory</item>
+       <item>@string/drawer_title_library</item>
+       <item>@string/drawer_title_settings</item>
+   </string-array>
+   <string-array name="icon">
+       <item>@drawable/ic_action_expand</item>
+       <item>@drawable/ic_action_image_photo_library</item>
+       <item>@drawable/ic_action_action_settings_applications</item>
+   </string-array>
 </resources>

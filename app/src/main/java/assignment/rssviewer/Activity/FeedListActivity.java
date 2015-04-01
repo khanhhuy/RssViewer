@@ -1,41 +1,32 @@
 package assignment.rssviewer.activity;
 
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
+import android.view.View;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+
 import assignment.rssviewer.R;
+import assignment.rssviewer.activity.adapter.PostListAdapter;
+import assignment.rssviewer.activity.model.PostData;
 
+public class FeedListActivity extends BaseDrawerActivity {
 
-public class FeedListActivity extends ActionBarActivity {
-
-    private DrawerLayout mDrawer;
-    private ListView mDrawerList;
-    private String[] mDrawerTitles;
+    ArrayList<PostData> listData;
+    PostListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.feedlist_layout);
-
-
-        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerTitles = getResources().getStringArray(R.array.drawer_list);
-
-        mDrawerList.setAdapter(new ArrayAdapter<String>(
-                this, R.layout.draweritem_layout, mDrawerTitles
-        ));
-
+        generateDummyData();
+        addNewView();
     }
 
-    //somecomment
-    //Dropdown in drawer
-    //http://stackoverflow.com/questions/23195740/how-to-implement-android-navigation-drawer-like-this#
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -57,5 +48,32 @@ public class FeedListActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void addNewView() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.feed_list_layout, null);
+        adapter = new PostListAdapter(this, R.layout.feed_item_layout, listData);
+        ListView listView = (ListView) view.findViewById(R.id.postListView);
+
+        if (listView == null)
+            Log.d("Add new View", "listView is null");
+
+        listView.setAdapter(adapter);
+
+        addContentView(view);
+    }
+
+    private void generateDummyData() {
+        PostData data = null;
+        listData = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            data = new PostData();
+            data.postDate = "April 2, 2015";
+            data.postTitle = "Post " + (i + 1)
+                    + " Title: This is the Post Title from RSS Feed";
+            data.postThumbUrl = null;
+            listData.add(data);
+        }
     }
 }
