@@ -1,10 +1,13 @@
 package assignment.rssviewer.activity;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +21,7 @@ import assignment.rssviewer.activity.adapter.DrawerListAdapter;
 import assignment.rssviewer.activity.model.DrawerData;
 
 
-public class BaseDrawerActivity extends ActionBarActivity {
+public abstract class BaseDrawerActivity extends ActionBarActivity {
 
     private ArrayList<DrawerData> mlistTitle;
     private DrawerListAdapter drawerListAdapter;
@@ -28,14 +31,14 @@ public class BaseDrawerActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.base_drawer_layout);
-
-        populateListTitle();
-        Log.d("DEBUG", "Finish populate list");
-
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        drawerListAdapter = new DrawerListAdapter(this, R.layout.base_leftdrawer_item_layout, mlistTitle);
-        mDrawerList.setAdapter(drawerListAdapter);
+        createDrawerItem();
+        inflateChildView();
+        DrawerLayout rootView = (DrawerLayout) findViewById(R.id.basedrawer_layout);
+        onSetContentView(rootView);
     }
+
+    protected abstract int getChildViewLayout();
+    protected abstract void onSetContentView(View rootView);
 
     //Dropdown in drawer
     //http://stackoverflow.com/questions/23195740/how-to-implement-android-navigation-drawer-like-this#
@@ -67,7 +70,10 @@ public class BaseDrawerActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void populateListTitle() {
+    /**
+     * Crate Item in the left Drawer
+     */
+    private void createDrawerItem() {
         Resources resources = getResources();
         TypedArray titles = resources.obtainTypedArray(R.array.title);
         TypedArray icons = resources.obtainTypedArray(R.array.icon);
@@ -85,15 +91,22 @@ public class BaseDrawerActivity extends ActionBarActivity {
             mlistTitle.add(drawerTitle);
         }
 
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        drawerListAdapter = new DrawerListAdapter(this, R.layout.base_leftdrawer_item_layout, mlistTitle);
+        mDrawerList.setAdapter(drawerListAdapter);
+
     }
 
     /**
-     * Create your custom view and pass it to this method
-     * @param view
+     * Inflate child View and add it to Framelayout
      */
-    protected void addContentView(View view) {
+    private void inflateChildView() {
+        int childViewid = getChildViewLayout();
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(childViewid, null);
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_frame);
         frameLayout.addView(view);
-        Log.d("Add new View", "Success");
     }
+
+
 }

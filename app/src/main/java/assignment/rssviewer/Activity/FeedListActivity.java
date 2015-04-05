@@ -23,8 +23,6 @@ public class FeedListActivity extends BaseDrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        generateDummyData();
-        addNewView();
     }
 
 
@@ -50,18 +48,21 @@ public class FeedListActivity extends BaseDrawerActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void addNewView() {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.feed_list_layout, null);
+    @Override
+    protected int getChildViewLayout() {
+        return R.layout.feed_list_layout;
+    }
+
+    @Override
+    protected void onSetContentView(View rootView) {
+        generateDummyData();
         adapter = new PostListAdapter(this, R.layout.feed_item_layout, listData);
-        ListView listView = (ListView) view.findViewById(R.id.postListView);
+        ListView listView = (ListView) rootView.findViewById(R.id.postListView);
 
         if (listView == null)
             Log.d("Add new View", "listView is null");
 
         listView.setAdapter(adapter);
-
-        addContentView(view);
     }
 
     private void generateDummyData() {
