@@ -1,6 +1,7 @@
 package assignment.rssviewer.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.support.v4.widget.DrawerLayout;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
@@ -108,5 +110,32 @@ public abstract class BaseDrawerActivity extends ActionBarActivity {
         frameLayout.addView(view);
     }
 
+    /**
+     * Handle click on drawer's item
+     */
 
+    private class DrawerItemClickListener implements ListView.OnItemClickListener{
+        @Override
+        public void onItemClick(AdapterView parent, View view, int position, long id) {
+            selectItem(position);
+        }
+    }
+
+    /**
+     * Start Activity from drawer
+     * @param position
+     */
+
+    private void selectItem(int position) {
+        Intent intent;
+        switch (position) {
+            case 1:
+                intent = new Intent(this, FeedListActivity.class);
+                startActivity(intent);
+                break;
+            case 2:
+                break;
+            default:
+        }
+    }
 }
