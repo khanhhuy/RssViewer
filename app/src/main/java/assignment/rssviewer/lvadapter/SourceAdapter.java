@@ -29,8 +29,8 @@ public class SourceAdapter extends ArrayAdapter<RssSource>
         TextView text2 = (TextView) view.findViewById(android.R.id.text2);
 
         RssSource source = super.getItem(position);
-        text1.setText(source.name);
-        text2.setText(source.sourceUri.toString());
+        text1.setText(source.getName());
+        text2.setText(source.getUriString());
 
         return view;
     }

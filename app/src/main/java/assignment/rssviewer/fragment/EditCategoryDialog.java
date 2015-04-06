@@ -19,7 +19,7 @@ public class EditCategoryDialog extends DialogFragment
     private String title;
     private String content;
     private boolean isNew;
-    private int id;
+    private long id;
     private OnClosedListener listener;
 
     public void setOnClosedListener(OnClosedListener value)
@@ -33,7 +33,7 @@ public class EditCategoryDialog extends DialogFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View contentView = inflater.inflate(R.layout.new_category_dialog_layout, null);
-        final EditText txtContent = (EditText)contentView.findViewById(R.id.txtName);
+        final EditText txtContent = (EditText) contentView.findViewById(R.id.txtName);
         txtContent.setText(content);
 
         builder.setTitle(this.title)
@@ -66,12 +66,13 @@ public class EditCategoryDialog extends DialogFragment
         title = args.getString("title");
         content = args.getString("content");
         isNew = args.getBoolean("isNew");
-        id = args.getInt("id");
+        id = args.getLong("id");
     }
 
     public interface OnClosedListener
     {
-        public void onAccepted(boolean isNew, int id, String content);
-        public void onCanceled(boolean isNew, int id, String content);
+        public void onAccepted(boolean isNew, long id, String content);
+
+        public void onCanceled(boolean isNew, long id, String content);
     }
 }
