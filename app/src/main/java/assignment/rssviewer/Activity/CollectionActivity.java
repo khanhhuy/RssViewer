@@ -12,6 +12,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +22,19 @@ import assignment.rssviewer.fragment.ConfirmDialog;
 import assignment.rssviewer.fragment.EditCategoryDialog;
 import assignment.rssviewer.lvadapter.CategoryAdapter;
 import assignment.rssviewer.model.Category;
+import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
+import assignment.rssviewer.utils.Action;
+import assignment.rssviewer.utils.AsyncResult;
 
 public class CollectionActivity extends ActionBarActivity
 {
-    private RssApplication application;
-    private ListView lvCategories;
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
+    private ListView lvCategories;
+    private CategoryAdapter categoryAdapter;
+    private ProgressBar progressBar;
+    private IDataService dataService;
 
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
@@ -89,36 +95,66 @@ public class CollectionActivity extends ActionBarActivity
     private EditCategoryDialog.OnClosedListener editCategoryOnClosedListener = new EditCategoryDialog.OnClosedListener()
     {
         @Override
-        public void onAccepted(boolean isNew, int id, String content)
+        public void onAccepted(boolean isNew, long id, final String content)
         {
             Category category;
             if (!isNew)
             {
-                category = application.getCategoryById(id);
-                category.name = content;
-                ((BaseAdapter)lvCategories.getAdapter()).notifyDataSetChanged();
+                category = dataService.getEntityById(Category.class, id);
+                category.setName(content);
+                dataService.updateEntityAsync(Category.class, null, category);
             }
             else
             {
-                category = application.createNewCategory(content);
-                showCategoryView(category.id);
+                setIsBusy(true);
+                category = new Category();
+                category.setName(content);
+
+                dataService.insertEntityAsync(category, new Action<AsyncResult<Category>>()
+                {
+                    @Override
+                    public void execute(AsyncResult<Category> result)
+                    {
+                        if (result.isSuccessful())
+                        {
+                            setIsBusy(false);
+                            categoryAdapter.add(result.getResult());
+                            showCategoryView(result.getResult().getId());
+                        }
+                    }
+                });
             }
+            notifyCategoriesChanged();
         }
 
         @Override
-        public void onCanceled(boolean isNew, int id, String content)
+        public void onCanceled(boolean isNew, long id, String content)
         {
-
         }
     };
 
     private ConfirmDialog.OnClosedListener confirmDeletionOnClosedListener = new ConfirmDialog.OnClosedListener()
     {
         @Override
+        @SuppressWarnings("unchecked")
         public void onAccepted()
         {
-            application.removeCategories(getSelectedCategories());
-            lvCategories.setAdapter(new CategoryAdapter(CollectionActivity.this, application.getCategories()));
+            setIsBusy(true);
+            final Category[] selectedCategories = getSelectedCategories();
+
+            dataService.deleteEntityAsync(Category.class, new Action<AsyncResult<Void>>()
+            {
+                @Override
+                public void execute(AsyncResult<Void> result)
+                {
+                    if (result.isSuccessful())
+                    {
+                        for (Category c : selectedCategories)
+                            categoryAdapter.remove(c);
+                        setIsBusy(false);
+                    }
+                }
+            }, selectedCategories);
         }
 
         @Override
@@ -132,9 +168,34 @@ public class CollectionActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.collection_layout);
 
-        application = (RssApplication) getApplication();
+        RssApplication application = (RssApplication) getApplication();
+        dataService = application.getDataService();
         lvCategories = (ListView) findViewById(R.id.lvCategories);
-        lvCategories.setAdapter(new CategoryAdapter(this, application.getCategories()));
+
+        setIsBusy(true);
+        dataService.initializeAsync(new Action<AsyncResult<Void>>()
+        {
+            @Override
+            public void execute(AsyncResult<Void> initResult)
+            {
+                if (initResult.isSuccessful())
+                {
+                    dataService.loadAllEntitiesAsync(Category.class, new Action<AsyncResult<List<Category>>>()
+                    {
+                        @Override
+                        public void execute(AsyncResult<List<Category>> loadResult)
+                        {
+                            if (loadResult.isSuccessful())
+                            {
+                                categoryAdapter = new CategoryAdapter(CollectionActivity.this, loadResult.getResult());
+                                lvCategories.setAdapter(categoryAdapter);
+                                setIsBusy(false);
+                            }
+                        }
+                    });
+                }
+            }
+        });
 
         lvCategories.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
@@ -142,7 +203,7 @@ public class CollectionActivity extends ActionBarActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Category selectedCategory = (Category) parent.getItemAtPosition(position);
-                showCategoryView(selectedCategory.id);
+                showCategoryView(selectedCategory.getId());
             }
         });
 
@@ -178,11 +239,11 @@ public class CollectionActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void showCategoryView(int categoryId)
+    private void showCategoryView(long categoryId)
     {
         Intent categoryIntent = new Intent(CollectionActivity.this, CategoryActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putInt("id", categoryId);
+        bundle.putLong("id", categoryId);
         categoryIntent.putExtras(bundle);
         startActivity(categoryIntent);
     }
@@ -193,7 +254,7 @@ public class CollectionActivity extends ActionBarActivity
         bundle.putString("title", "New Category");
         bundle.putString("content", "");
         bundle.putBoolean("isNew", true);
-        bundle.putInt("id", 0);
+        bundle.putLong("id", 0);
         editCategoryDialog.setArguments(bundle);
         editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
     }
@@ -204,9 +265,9 @@ public class CollectionActivity extends ActionBarActivity
         {
             Bundle bundle = new Bundle();
             bundle.putString("title", "Edit Category");
-            bundle.putString("content", category.name);
+            bundle.putString("content", category.getName());
             bundle.putBoolean("isNew", false);
-            bundle.putInt("id", category.id);
+            bundle.putLong("id", category.getId());
             editCategoryDialog.setArguments(bundle);
             editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
         }
@@ -236,13 +297,13 @@ public class CollectionActivity extends ActionBarActivity
 
             if (pos >= 0)
             {
-                return (Category)lvCategories.getAdapter().getItem(pos);
+                return (Category) lvCategories.getAdapter().getItem(pos);
             }
         }
         return null;
     }
 
-    private List<Category> getSelectedCategories()
+    private Category[] getSelectedCategories()
     {
         List<Category> selectedCategories = new ArrayList<>();
 
@@ -261,6 +322,21 @@ public class CollectionActivity extends ActionBarActivity
             }
         }
 
-        return selectedCategories;
+        Category[] result = new Category[selectedCategories.size()];
+        result = selectedCategories.toArray(result);
+
+        return result;
+    }
+
+    private void setIsBusy(boolean value)
+    {
+        if (progressBar == null)
+            progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setIndeterminate(value);
+    }
+
+    private void notifyCategoriesChanged()
+    {
+        ((BaseAdapter) lvCategories.getAdapter()).notifyDataSetChanged();
     }
 }

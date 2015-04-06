@@ -8,18 +8,23 @@ import android.view.MenuItem;
 import android.widget.ListView;
 
 import assignment.rssviewer.R;
-import assignment.rssviewer.fragment.EditCategoryDialog;
 import assignment.rssviewer.lvadapter.SourceAdapter;
 import assignment.rssviewer.model.Category;
+import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 
 public class CategoryActivity extends ActionBarActivity
 {
+    private IDataService dataService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.category_layout);
+
+        RssApplication application = (RssApplication) getApplication();
+        dataService = application.getDataService();
 
         displayData();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -27,20 +32,18 @@ public class CategoryActivity extends ActionBarActivity
 
     private void displayData()
     {
-        RssApplication application = (RssApplication)getApplication();
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
-        Category category = application.getCategoryById(bundle.getInt("id"));
+        Category category = dataService.getEntityById(Category.class, bundle.getLong("id"));
         if (category != null)
         {
-            setTitle(category.name);
-            ListView lvSources = (ListView)findViewById(R.id.lvSources);
-            SourceAdapter adapter = new SourceAdapter(this, category.rssSources);
+            setTitle(category.getName());
+            ListView lvSources = (ListView) findViewById(R.id.lvSources);
+            SourceAdapter adapter = new SourceAdapter(this, category.getRssSources());
             lvSources.setAdapter(adapter);
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -56,13 +59,6 @@ public class CategoryActivity extends ActionBarActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
