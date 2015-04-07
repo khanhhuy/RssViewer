@@ -1,13 +1,16 @@
-package assignment.rssviewer.activity;
+package assignment.rssviewer.activity.main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.SparseBooleanArray;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -18,16 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import assignment.rssviewer.R;
-import assignment.rssviewer.fragment.ConfirmDialog;
-import assignment.rssviewer.fragment.EditCategoryDialog;
+import assignment.rssviewer.activity.CategoryActivity;
 import assignment.rssviewer.adapter.CategoryAdapter;
+import assignment.rssviewer.dialog.ConfirmDialog;
+import assignment.rssviewer.dialog.EditCategoryDialog;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
 
-public class CollectionActivity extends BaseDrawerActivity
+public class MyCollectionFragment extends Fragment
 {
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
@@ -35,6 +39,7 @@ public class CollectionActivity extends BaseDrawerActivity
     private CategoryAdapter categoryAdapter;
     private ProgressBar progressBar;
     private IDataService dataService;
+    private View thisView;
 
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
@@ -163,12 +168,14 @@ public class CollectionActivity extends BaseDrawerActivity
         }
     };
 
-    protected void onCreate(Bundle savedInstanceState)
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
-        RssApplication application = (RssApplication) getApplication();
+        thisView = inflater.inflate(R.layout.collection_layout, container, false);
+
+        RssApplication application = (RssApplication) getActivity().getApplication();
         dataService = application.getDataService();
-        lvCategories = (ListView) findViewById(R.id.lvCategories);
+        lvCategories = (ListView) thisView.findViewById(R.id.lvCategories);
 
         setIsBusy(true);
         dataService.initializeAsync(new Action<AsyncResult<Void>>()
@@ -185,7 +192,7 @@ public class CollectionActivity extends BaseDrawerActivity
                         {
                             if (loadResult.isSuccessful())
                             {
-                                categoryAdapter = new CategoryAdapter(CollectionActivity.this, loadResult.getResult());
+                                categoryAdapter = new CategoryAdapter(getActivity(), loadResult.getResult());
                                 lvCategories.setAdapter(categoryAdapter);
                                 setIsBusy(false);
                             }
@@ -210,20 +217,14 @@ public class CollectionActivity extends BaseDrawerActivity
 
         editCategoryDialog.setOnClosedListener(editCategoryOnClosedListener);
         confirmDeletionDialog.setOnClosedListener(confirmDeletionOnClosedListener);
+
+        return thisView;
     }
 
     @Override
-    protected int getChildViewLayout()
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
-        return R.layout.collection_layout;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_collection, menu);
-        return true;
+        inflater.inflate(R.menu.menu_collection, menu);
     }
 
     @Override
@@ -245,7 +246,7 @@ public class CollectionActivity extends BaseDrawerActivity
 
     private void showCategoryView(long categoryId)
     {
-        Intent categoryIntent = new Intent(CollectionActivity.this, CategoryActivity.class);
+        Intent categoryIntent = new Intent(getActivity(), CategoryActivity.class);
         Bundle bundle = new Bundle();
         bundle.putLong("id", categoryId);
         categoryIntent.putExtras(bundle);
@@ -260,7 +261,7 @@ public class CollectionActivity extends BaseDrawerActivity
         bundle.putBoolean("isNew", true);
         bundle.putLong("id", 0);
         editCategoryDialog.setArguments(bundle);
-        editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
+        editCategoryDialog.show(getActivity().getFragmentManager(), "editCategoryDialog");
     }
 
     private void editCategory(Category category)
@@ -273,7 +274,7 @@ public class CollectionActivity extends BaseDrawerActivity
             bundle.putBoolean("isNew", false);
             bundle.putLong("id", category.getId());
             editCategoryDialog.setArguments(bundle);
-            editCategoryDialog.show(getFragmentManager(), "editCategoryDialog");
+            editCategoryDialog.show(getActivity().getFragmentManager(), "editCategoryDialog");
         }
     }
 
@@ -283,7 +284,7 @@ public class CollectionActivity extends BaseDrawerActivity
         bundle.putString("title", "Confirm Deletion");
         bundle.putString("content", "Are you sure you want to remove these categories?");
         confirmDeletionDialog.setArguments(bundle);
-        confirmDeletionDialog.show(getFragmentManager(), "confirmDeletionDialog");
+        confirmDeletionDialog.show(getActivity().getFragmentManager(), "confirmDeletionDialog");
     }
 
     private Category getFirstSelectedCategory()
@@ -335,7 +336,7 @@ public class CollectionActivity extends BaseDrawerActivity
     private void setIsBusy(boolean value)
     {
         if (progressBar == null)
-            progressBar = (ProgressBar) findViewById(R.id.progressBar);
+            progressBar = (ProgressBar) thisView.findViewById(R.id.progressBar);
         progressBar.setIndeterminate(value);
     }
 

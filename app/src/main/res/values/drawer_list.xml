@@ -11,8 +11,8 @@
        <item>@drawable/ic_action_action_settings_applications</item>
    </string-array>
 	<string-array name="activityClasses">
-		<item>assignment.rssviewer.activity.FeedListActivity</item>
-		<item>assignment.rssviewer.activity.CollectionActivity</item>
+		<item>assignment.rssviewer.activity.main.FeedListFragment</item>
+		<item>assignment.rssviewer.activity.main.MyCollectionFragment</item>
 		<item>nope</item>
 	</string-array>
 </resources>

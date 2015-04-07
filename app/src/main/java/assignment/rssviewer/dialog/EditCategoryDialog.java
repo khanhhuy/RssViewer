@@ -1,4 +1,4 @@
-package assignment.rssviewer.fragment;
+package assignment.rssviewer.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

@@ -1,49 +1,41 @@
 package assignment.rssviewer.adapter;
 
-import android.app.Activity;
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.List;
 
 import assignment.rssviewer.R;
-
-import java.util.List;
 
 /**
  * Created by Huy on 3/29/2015.
  */
-public class DrawerAdapter extends ArrayAdapter<DrawerAdapter.DrawerItem> {
-    private Activity context;
-    private List<DrawerItem> drawerDatas;
+public class DrawerAdapter extends ArrayAdapter<DrawerAdapter.DrawerItem>
+{
+    private final List<DrawerItem> drawerItems;
 
-    public DrawerAdapter(Context context, int textViewResourceId, List<DrawerItem> objects) {
-        super(context, textViewResourceId, objects);
-        this.context = (Activity) context;
-        this.drawerDatas = objects;
+    public DrawerAdapter(Context context, List<DrawerItem> drawerItems)
+    {
+        super(context, R.layout.drawer_item_layout, R.id.titleText, drawerItems);
+        this.drawerItems = drawerItems;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        if (convertView == null) {
-            LayoutInflater inflater = context.getLayoutInflater();
-            convertView = inflater.inflate(R.layout.base_leftdrawer_item_layout, null);
-        }
-
-        View rowView = convertView;
+    public View getView(int position, View convertView, ViewGroup parent)
+    {
+        View rowView = super.getView(position, convertView, parent);
 
         ImageView thumbnailView = (ImageView) rowView.findViewById(R.id.iconview);
-        thumbnailView.setImageResource(drawerDatas.get(position).getIcon());
+        thumbnailView.setImageResource(drawerItems.get(position).getIcon());
 
         TextView titleView = (TextView) rowView.findViewById(R.id.titleText);
-        titleView.setText(drawerDatas.get(position).getTitle());
+        titleView.setText(drawerItems.get(position).getTitle());
 
-        return  rowView;
+        return rowView;
     }
 
     /**
@@ -53,32 +45,36 @@ public class DrawerAdapter extends ArrayAdapter<DrawerAdapter.DrawerItem> {
     {
         private String title;
         private Integer icon;
-        private Class<?> activityClass;
+        private String fragmentName;
 
-        public String getTitle() {
+        public String getTitle()
+        {
             return title;
         }
 
-        public void setTitle(String title) {
+        public void setTitle(String title)
+        {
             this.title = title;
         }
 
-        public Integer getIcon() {
+        public Integer getIcon()
+        {
             return icon;
         }
 
-        public void setIcon(Integer icon) {
+        public void setIcon(Integer icon)
+        {
             this.icon = icon;
         }
 
-        public Class<?> getActivityClass()
+        public String getFragmentName()
         {
-            return activityClass;
+            return fragmentName;
         }
 
-        public void setActivityClass(Class<?> value)
+        public void setFragmentName(String value)
         {
-            this.activityClass = value;
+            this.fragmentName = value;
         }
     }
 }
