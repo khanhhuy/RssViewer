@@ -51,7 +51,6 @@ public class DrawerAdapter extends ArrayAdapter<DrawerAdapter.DrawerItem> {
      */
     public static class DrawerItem
     {
-
         private String title;
         private Integer icon;
         private Class<?> activityClass;

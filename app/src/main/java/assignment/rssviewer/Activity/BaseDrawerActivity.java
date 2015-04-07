@@ -34,13 +34,13 @@ public abstract class BaseDrawerActivity extends ActionBarActivity {
     //private ListView drawerListView;
 
     // statically stores info for current activity position, used to consistently highlight selected item in drawer list
-    // because the drawer list is an instance member, so different activities have different drawer list instance
-    // default value is 0 -> when user first launches the app, the position 0 item is highlighted, which mean the first activity
+    // because the drawer list is an instance member, so different activities have different drawer list instances
+    // default value is 0 -> when user first launches the app, the position 0 item is highlighted, which means the first activity
     // in the list should launch at startup
     private static int CURRENT_POSITION = 0;
 
     // used for caching the drawer list items
-    // this is static because it doesn't change at runtime, which mean any extended classes get the same items.
+    // this is static because it doesn't change at runtime, which means any extended classes get the same items.
     private static final List<DrawerAdapter.DrawerItem> DRAWER_ITEMS = new ArrayList<>();
 
     @Override
