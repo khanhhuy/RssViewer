@@ -1,4 +1,4 @@
-package assignment.rssviewer.activity.model;
+package assignment.rssviewer.utils;
 
 /**
  * Created by Huy on 4/1/2015.

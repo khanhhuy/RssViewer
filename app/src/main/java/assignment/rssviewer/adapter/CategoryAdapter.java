@@ -1,4 +1,4 @@
-package assignment.rssviewer.lvadapter;
+package assignment.rssviewer.adapter;
 
 import android.content.Context;
 import android.view.View;

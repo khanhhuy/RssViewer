@@ -9,94 +9,91 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import assignment.rssviewer.R;
-import assignment.rssviewer.activity.adapter.DrawerListAdapter;
-import assignment.rssviewer.activity.model.DrawerData;
+import assignment.rssviewer.adapter.DrawerAdapter;
 
 
 public abstract class BaseDrawerActivity extends ActionBarActivity {
 
-    private ArrayList<DrawerData> mlistTitle;
-    private DrawerListAdapter drawerListAdapter;
-    private ListView mDrawerList;
+    //private ArrayList<DrawerAdapter.DrawerItem> mlistTitle;
+    private DrawerAdapter drawerListAdapter;
+    private DrawerLayout drawerLayout;
+    //private ListView drawerListView;
+
+    private static int CURRENT_POSITION = 0;
+    private static final List<DrawerAdapter.DrawerItem> DRAWER_ITEMS = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.base_drawer_layout);
-        createDrawerItem();
         inflateChildView();
-        DrawerLayout rootView = (DrawerLayout) findViewById(R.id.basedrawer_layout);
-        onSetContentView(rootView);
+
+        List<DrawerAdapter.DrawerItem> drawerItems = createDrawerItems(this);
+        ListView drawerListView = (ListView) findViewById(R.id.left_drawer);
+        drawerListAdapter = new DrawerAdapter(this, R.layout.base_leftdrawer_item_layout, drawerItems);
+        drawerListView.setAdapter(drawerListAdapter);
+        drawerListView.setOnItemClickListener(new DrawerItemClickListener());
+        drawerListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+        drawerListView.setItemChecked(CURRENT_POSITION, true);
+
+        drawerLayout = (DrawerLayout)findViewById(R.id.basedrawer_layout);
+
+        //DrawerLayout rootView = (DrawerLayout) findViewById(R.id.basedrawer_layout);
+        //onSetContentView(rootView);
     }
 
     protected abstract int getChildViewLayout();
-    protected abstract void onSetContentView(View rootView);
+    //protected abstract void onSetContentView(View rootView);
 
     //Dropdown in drawer
     //http://stackoverflow.com/questions/23195740/how-to-implement-android-navigation-drawer-like-this#
 
-    @Override
-    /**
-     * Override this method for new option menu.
-     */
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        return true;
-    }
-
-    /**
-     * Override this method for new option menu.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * Crate Item in the left Drawer
      */
-    private void createDrawerItem() {
-        Resources resources = getResources();
-        TypedArray titles = resources.obtainTypedArray(R.array.title);
-        TypedArray icons = resources.obtainTypedArray(R.array.icon);
+    private static List<DrawerAdapter.DrawerItem> createDrawerItems(Context context) {
+        if (DRAWER_ITEMS.size() <= 0)
+        {
+            Resources resources = context.getResources();
+            TypedArray titles = resources.obtainTypedArray(R.array.title);
+            TypedArray icons = resources.obtainTypedArray(R.array.icon);
+            TypedArray activityClasses = resources.obtainTypedArray(R.array.activityClasses);
 
-        mlistTitle = new ArrayList<DrawerData>();
+            Log.d("Array length", (Integer.valueOf(titles.length()).toString()));
 
-        Log.d("Array length", (new Integer(titles.length()).toString()));
+            for (int i = 0; i < titles.length(); i++) {
+                DrawerAdapter.DrawerItem drawerItem = new DrawerAdapter.DrawerItem();
+                drawerItem.setTitle(titles.getString(i));
+                drawerItem.setIcon(icons.getResourceId(i, -1));
+                try
+                {
+                    drawerItem.setActivityClass(Class.forName(activityClasses.getString(i)));
+                }
+                catch (Exception ex)
+                {
+                    Log.e("Activity", String.format("Activity class for %s is not found.", drawerItem.getTitle()));
+                }
+                Log.d("Title" + i + " ", drawerItem.getTitle());
+                Log.d("Thumbnail" + i + " ", drawerItem.getIcon().toString());
+                DRAWER_ITEMS.add(drawerItem);
+            }
 
-        for (int i = 0; i < titles.length(); i++) {
-            DrawerData drawerTitle = new DrawerData();
-            drawerTitle.setTitle(titles.getString(i));
-            drawerTitle.setIcon(icons.getResourceId(i, -1));
-            Log.d("Title" + i + " ", drawerTitle.getTitle());
-            Log.d("Thumbnai" + i + " ", drawerTitle.getIcon().toString());
-            mlistTitle.add(drawerTitle);
+            titles.recycle();
+            icons.recycle();
+            activityClasses.recycle();
         }
 
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        drawerListAdapter = new DrawerListAdapter(this, R.layout.base_leftdrawer_item_layout, mlistTitle);
-        mDrawerList.setAdapter(drawerListAdapter);
-
+        return DRAWER_ITEMS;
     }
 
     /**
@@ -127,15 +124,24 @@ public abstract class BaseDrawerActivity extends ActionBarActivity {
      */
 
     private void selectItem(int position) {
-        Intent intent;
-        switch (position) {
-            case 1:
-                intent = new Intent(this, FeedListActivity.class);
+        if (CURRENT_POSITION != position)
+        {
+            DrawerAdapter.DrawerItem drawerItem = drawerListAdapter.getItem(position);
+            Class<?> activityClass = drawerItem.getActivityClass();
+            if (activityClass != null)
+            {
+                CURRENT_POSITION = position;
+                Intent intent = new Intent(this, activityClass);
                 startActivity(intent);
-                break;
-            case 2:
-                break;
-            default:
+            }
+            else
+            {
+                Log.e("Activity", String.format("Activity class for %s is not found.", drawerItem.getTitle()));
+            }
+        }
+        else
+        {
+            drawerLayout.closeDrawers();
         }
     }
 }

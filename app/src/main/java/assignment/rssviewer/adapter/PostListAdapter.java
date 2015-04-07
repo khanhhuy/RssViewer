@@ -1,4 +1,4 @@
-package assignment.rssviewer.activity.adapter;
+package assignment.rssviewer.adapter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,7 +12,7 @@ import android.widget.TextView;
 import assignment.rssviewer.R;
 import java.util.ArrayList;
 
-import assignment.rssviewer.activity.model.PostData;
+import assignment.rssviewer.utils.PostData;
 
 
 /**

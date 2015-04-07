@@ -20,14 +20,14 @@ import java.util.List;
 import assignment.rssviewer.R;
 import assignment.rssviewer.fragment.ConfirmDialog;
 import assignment.rssviewer.fragment.EditCategoryDialog;
-import assignment.rssviewer.lvadapter.CategoryAdapter;
+import assignment.rssviewer.adapter.CategoryAdapter;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
 
-public class CollectionActivity extends ActionBarActivity
+public class CollectionActivity extends BaseDrawerActivity
 {
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
@@ -166,8 +166,6 @@ public class CollectionActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.collection_layout);
-
         RssApplication application = (RssApplication) getApplication();
         dataService = application.getDataService();
         lvCategories = (ListView) findViewById(R.id.lvCategories);
@@ -212,6 +210,12 @@ public class CollectionActivity extends ActionBarActivity
 
         editCategoryDialog.setOnClosedListener(editCategoryOnClosedListener);
         confirmDeletionDialog.setOnClosedListener(confirmDeletionOnClosedListener);
+    }
+
+    @Override
+    protected int getChildViewLayout()
+    {
+        return R.layout.collection_layout;
     }
 
     @Override

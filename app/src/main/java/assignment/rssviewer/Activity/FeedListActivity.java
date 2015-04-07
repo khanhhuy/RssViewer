@@ -1,9 +1,7 @@
 package assignment.rssviewer.activity;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,8 +10,8 @@ import android.widget.ListView;
 import java.util.ArrayList;
 
 import assignment.rssviewer.R;
-import assignment.rssviewer.activity.adapter.PostListAdapter;
-import assignment.rssviewer.activity.model.PostData;
+import assignment.rssviewer.adapter.PostListAdapter;
+import assignment.rssviewer.utils.PostData;
 
 public class FeedListActivity extends BaseDrawerActivity {
 
@@ -23,6 +21,14 @@ public class FeedListActivity extends BaseDrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        generateDummyData();
+        adapter = new PostListAdapter(this, R.layout.feed_item_layout, listData);
+        ListView listView = (ListView) findViewById(R.id.postListView);
+
+        if (listView == null)
+            Log.d("Add new View", "listView is null");
+
+        listView.setAdapter(adapter);
     }
 
 
@@ -53,7 +59,7 @@ public class FeedListActivity extends BaseDrawerActivity {
         return R.layout.feed_list_layout;
     }
 
-    @Override
+    /*@Override
     protected void onSetContentView(View rootView) {
         generateDummyData();
         adapter = new PostListAdapter(this, R.layout.feed_item_layout, listData);
@@ -63,7 +69,7 @@ public class FeedListActivity extends BaseDrawerActivity {
             Log.d("Add new View", "listView is null");
 
         listView.setAdapter(adapter);
-    }
+    }*/
 
     private void generateDummyData() {
         PostData data = null;

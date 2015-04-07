@@ -1,4 +1,4 @@
-package assignment.rssviewer.activity.adapter;
+package assignment.rssviewer.adapter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,18 +12,16 @@ import android.widget.TextView;
 
 import assignment.rssviewer.R;
 
-import java.util.ArrayList;
-
-import assignment.rssviewer.activity.model.DrawerData;
+import java.util.List;
 
 /**
  * Created by Huy on 3/29/2015.
  */
-public class DrawerListAdapter extends ArrayAdapter<DrawerData> {
+public class DrawerAdapter extends ArrayAdapter<DrawerAdapter.DrawerItem> {
     private Activity context;
-    private ArrayList<DrawerData> drawerDatas;
+    private List<DrawerItem> drawerDatas;
 
-    public  DrawerListAdapter(Context context, int textViewResourceId, ArrayList<DrawerData> objects) {
+    public DrawerAdapter(Context context, int textViewResourceId, List<DrawerItem> objects) {
         super(context, textViewResourceId, objects);
         this.context = (Activity) context;
         this.drawerDatas = objects;
@@ -48,4 +46,40 @@ public class DrawerListAdapter extends ArrayAdapter<DrawerData> {
         return  rowView;
     }
 
+    /**
+     * Created by Huy on 3/29/2015.
+     */
+    public static class DrawerItem
+    {
+
+        private String title;
+        private Integer icon;
+        private Class<?> activityClass;
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Integer getIcon() {
+            return icon;
+        }
+
+        public void setIcon(Integer icon) {
+            this.icon = icon;
+        }
+
+        public Class<?> getActivityClass()
+        {
+            return activityClass;
+        }
+
+        public void setActivityClass(Class<?> value)
+        {
+            this.activityClass = value;
+        }
+    }
 }

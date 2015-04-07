@@ -8,7 +8,7 @@ import android.view.MenuItem;
 import android.widget.ListView;
 
 import assignment.rssviewer.R;
-import assignment.rssviewer.lvadapter.SourceAdapter;
+import assignment.rssviewer.adapter.SourceAdapter;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
