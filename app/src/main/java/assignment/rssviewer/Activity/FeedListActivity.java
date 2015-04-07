@@ -21,6 +21,8 @@ public class FeedListActivity extends BaseDrawerActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // the body of the removed method onSetContentView() can be placed here instead
         generateDummyData();
         adapter = new PostListAdapter(this, R.layout.feed_item_layout, listData);
         ListView listView = (ListView) findViewById(R.id.postListView);

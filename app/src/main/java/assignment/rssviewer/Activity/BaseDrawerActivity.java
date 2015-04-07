@@ -21,7 +21,11 @@ import java.util.List;
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.DrawerAdapter;
 
-
+/**
+ * The list item should be static, so the all-category item should not be placed in the list,
+ * such functionality should be implemented in the FeedListActivity instead.
+ * The drawer should be used for navigating between top-level activities only.
+ */
 public abstract class BaseDrawerActivity extends ActionBarActivity {
 
     //private ArrayList<DrawerAdapter.DrawerItem> mlistTitle;
@@ -29,7 +33,14 @@ public abstract class BaseDrawerActivity extends ActionBarActivity {
     private DrawerLayout drawerLayout;
     //private ListView drawerListView;
 
+    // statically stores info for current activity position, used to consistently highlight selected item in drawer list
+    // because the drawer list is an instance member, so different activities have different drawer list instance
+    // default value is 0 -> when user first launches the app, the position 0 item is highlighted, which mean the first activity
+    // in the list should launch at startup
     private static int CURRENT_POSITION = 0;
+
+    // used for caching the drawer list items
+    // this is static because it doesn't change at runtime, which mean any extended classes get the same items.
     private static final List<DrawerAdapter.DrawerItem> DRAWER_ITEMS = new ArrayList<>();
 
     @Override
@@ -48,18 +59,22 @@ public abstract class BaseDrawerActivity extends ActionBarActivity {
 
         drawerLayout = (DrawerLayout)findViewById(R.id.basedrawer_layout);
 
+        // onSetContentView might not be necessary, because extended class can override onCreate() and does view related things after calling
+        // super.onCreated() (see class FeedListActivity for more details).
         //DrawerLayout rootView = (DrawerLayout) findViewById(R.id.basedrawer_layout);
         //onSetContentView(rootView);
     }
 
     protected abstract int getChildViewLayout();
-    //protected abstract void onSetContentView(View rootView);
+    //protected abstract void onSetContentView(View rootView); <-- not necessary anymore
 
     //Dropdown in drawer
     //http://stackoverflow.com/questions/23195740/how-to-implement-android-navigation-drawer-like-this#
 
     /**
      * Crate Item in the left Drawer
+     * if DRAWER_ITEMS contains no items, we have to fill it with information in drawer_list.xml
+     * otherwise return the cached list.
      */
     private static List<DrawerAdapter.DrawerItem> createDrawerItems(Context context) {
         if (DRAWER_ITEMS.size() <= 0)
@@ -120,6 +135,7 @@ public abstract class BaseDrawerActivity extends ActionBarActivity {
 
     /**
      * Start Activity from drawer
+     * the activity associated with the drawer item will be launched.
      * @param position
      */
 
