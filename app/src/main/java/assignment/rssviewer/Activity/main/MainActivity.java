@@ -26,7 +26,7 @@ import assignment.rssviewer.adapter.DrawerAdapter;
 public class MainActivity extends ActionBarActivity
 {
     private final List<DrawerAdapter.DrawerItem> drawerItems = new ArrayList<>();
-    private int currentPosition = 0;
+    private int currentPos = 0, prevPos = 0;
     private ActionBarDrawerToggle drawerToggle;
     private ListView lvDrawer;
     private DrawerLayout drawerLayout;
@@ -64,16 +64,24 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id)
             {
-                if (currentPosition != position)
-                {
-                    if (startFragment(drawerItems.get(position)))
-                        currentPosition = position;
-                }
+                currentPos = position;
                 drawerLayout.closeDrawer(lvDrawer);
             }
         });
 
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close);
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close)
+        {
+            @Override
+            public void onDrawerClosed(View drawerView)
+            {
+                super.onDrawerClosed(drawerView);
+                if (currentPos != prevPos)
+                {
+                    startFragment(drawerItems.get(currentPos));
+                    prevPos = currentPos;
+                }
+            }
+        };
         drawerLayout.setDrawerListener(drawerToggle);
 
         startFragment(drawerItems.get(0));

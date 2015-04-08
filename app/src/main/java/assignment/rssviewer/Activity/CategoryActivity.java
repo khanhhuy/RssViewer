@@ -15,6 +15,7 @@ import assignment.rssviewer.service.RssApplication;
 
 public class CategoryActivity extends ActionBarActivity
 {
+    public static final String ID_KEY = "id";
     private IDataService dataService;
 
     @Override
@@ -53,7 +54,7 @@ public class CategoryActivity extends ActionBarActivity
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
-        Category category = dataService.getEntityById(Category.class, bundle.getLong("id"));
+        Category category = dataService.getEntityById(Category.class, bundle.getLong(ID_KEY));
         if (category != null)
         {
             setTitle(category.getName());

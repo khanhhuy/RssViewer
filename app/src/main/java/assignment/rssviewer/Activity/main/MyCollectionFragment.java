@@ -256,7 +256,7 @@ public class MyCollectionFragment extends Fragment
     {
         Intent categoryIntent = new Intent(getActivity(), CategoryActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putLong("id", categoryId);
+        bundle.putLong(CategoryActivity.ID_KEY, categoryId);
         categoryIntent.putExtras(bundle);
         startActivity(categoryIntent);
     }
@@ -277,10 +277,10 @@ public class MyCollectionFragment extends Fragment
         if (category != null)
         {
             Bundle bundle = new Bundle();
-            bundle.putString("title", "Edit Category");
-            bundle.putString("content", category.getName());
-            bundle.putBoolean("isNew", false);
-            bundle.putLong("id", category.getId());
+            bundle.putString(EditCategoryDialog.TITLE_KEY, "Edit Category");
+            bundle.putString(EditCategoryDialog.CONTENT_KEY, category.getName());
+            bundle.putBoolean(EditCategoryDialog.IS_NEW_KEY, false);
+            bundle.putLong(EditCategoryDialog.ID_KEY, category.getId());
             editCategoryDialog.setArguments(bundle);
             editCategoryDialog.show(getActivity().getFragmentManager(), "editCategoryDialog");
         }
@@ -289,8 +289,8 @@ public class MyCollectionFragment extends Fragment
     private void removeCategories()
     {
         Bundle bundle = new Bundle();
-        bundle.putString("title", "Confirm Deletion");
-        bundle.putString("content", "Are you sure you want to remove these categories?");
+        bundle.putString(ConfirmDialog.TITLE_KEY, "Confirm Deletion");
+        bundle.putString(ConfirmDialog.CONTENT_KEY, "Are you sure you want to remove these categories?");
         confirmDeletionDialog.setArguments(bundle);
         confirmDeletionDialog.show(getActivity().getFragmentManager(), "confirmDeletionDialog");
     }

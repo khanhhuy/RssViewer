@@ -15,6 +15,9 @@ public class ConfirmDialog extends DialogFragment
     private String content;
     private OnClosedListener onClosedListener;
 
+    public static final String TITLE_KEY = "title";
+    public static final String CONTENT_KEY = "content";
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
@@ -49,8 +52,8 @@ public class ConfirmDialog extends DialogFragment
     @Override
     public void setArguments(Bundle args)
     {
-        title = args.getString("title");
-        content = args.getString("content");
+        title = args.getString(TITLE_KEY);
+        content = args.getString(CONTENT_KEY);
     }
 
     public void setOnClosedListener(OnClosedListener value)

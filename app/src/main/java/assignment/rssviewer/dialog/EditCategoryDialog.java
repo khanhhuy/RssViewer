@@ -16,6 +16,11 @@ import assignment.rssviewer.R;
  */
 public class EditCategoryDialog extends DialogFragment
 {
+    public static final String TITLE_KEY = "title";
+    public static final String CONTENT_KEY = "content";
+    public static final String IS_NEW_KEY = "isNew";
+    public static final String ID_KEY = "id";
+
     private String title;
     private String content;
     private boolean isNew;
@@ -63,10 +68,10 @@ public class EditCategoryDialog extends DialogFragment
     @Override
     public void setArguments(Bundle args)
     {
-        title = args.getString("title");
-        content = args.getString("content");
-        isNew = args.getBoolean("isNew");
-        id = args.getLong("id");
+        title = args.getString(TITLE_KEY);
+        content = args.getString(CONTENT_KEY);
+        isNew = args.getBoolean(IS_NEW_KEY);
+        id = args.getLong(ID_KEY);
     }
 
     public interface OnClosedListener
