@@ -65,41 +65,6 @@ public class RssSourceDao extends AbstractDao<RssSource, Long>
      * @inheritdoc
      */
     @Override
-    protected void bindValues(SQLiteStatement stmt, RssSource entity)
-    {
-        stmt.clearBindings();
-
-        Long id = entity.getId();
-        if (id != null)
-        {
-            stmt.bindLong(1, id);
-        }
-
-        String name = entity.getName();
-        if (name != null)
-        {
-            stmt.bindString(2, name);
-        }
-
-        String uriString = entity.getUriString();
-        if (uriString != null)
-        {
-            stmt.bindString(3, uriString);
-        }
-        stmt.bindLong(4, entity.getCategoryId());
-    }
-
-    @Override
-    protected void attachEntity(RssSource entity)
-    {
-        super.attachEntity(entity);
-        entity.__setDaoSession(daoSession);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
     public Long readKey(Cursor cursor, int offset)
     {
         return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
@@ -136,16 +101,6 @@ public class RssSourceDao extends AbstractDao<RssSource, Long>
      * @inheritdoc
      */
     @Override
-    protected Long updateKeyAfterInsert(RssSource entity, long rowId)
-    {
-        entity.setId(rowId);
-        return rowId;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
     public Long getKey(RssSource entity)
     {
         if (entity != null)
@@ -156,15 +111,6 @@ public class RssSourceDao extends AbstractDao<RssSource, Long>
         {
             return null;
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
-    protected boolean isEntityUpdateable()
-    {
-        return true;
     }
 
     /**
@@ -184,36 +130,6 @@ public class RssSourceDao extends AbstractDao<RssSource, Long>
         Query<RssSource> query = category_RssSourcesQuery.forCurrentThread();
         query.setParameter(0, categoryId);
         return query.list();
-    }
-
-    protected String getSelectDeep()
-    {
-        if (selectDeep == null)
-        {
-            StringBuilder builder = new StringBuilder("SELECT ");
-            SqlUtils.appendColumns(builder, "T", getAllColumns());
-            builder.append(',');
-            SqlUtils.appendColumns(builder, "T0", daoSession.getCategoryDao().getAllColumns());
-            builder.append(" FROM RSS_SOURCE T");
-            builder.append(" LEFT JOIN CATEGORY T0 ON T.'CATEGORY_ID'=T0.'_id'");
-            builder.append(' ');
-            selectDeep = builder.toString();
-        }
-        return selectDeep;
-    }
-
-    protected RssSource loadCurrentDeep(Cursor cursor, boolean lock)
-    {
-        RssSource entity = loadCurrent(cursor, 0, lock);
-        int offset = getAllColumns().length;
-
-        Category category = loadCurrentOther(daoSession.getCategoryDao(), cursor, offset);
-        if (category != null)
-        {
-            entity.setCategory(category);
-        }
-
-        return entity;
     }
 
     public RssSource loadDeep(Long key)
@@ -284,6 +200,99 @@ public class RssSourceDao extends AbstractDao<RssSource, Long>
         return list;
     }
 
+    /**
+     * A raw-style query where you can pass any WHERE clause and arguments.
+     */
+    public List<RssSource> queryDeep(String where, String... selectionArg)
+    {
+        Cursor cursor = db.rawQuery(getSelectDeep() + where, selectionArg);
+        return loadDeepAllAndCloseCursor(cursor);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected void bindValues(SQLiteStatement stmt, RssSource entity)
+    {
+        stmt.clearBindings();
+
+        Long id = entity.getId();
+        if (id != null)
+        {
+            stmt.bindLong(1, id);
+        }
+
+        String name = entity.getName();
+        if (name != null)
+        {
+            stmt.bindString(2, name);
+        }
+
+        String uriString = entity.getUriString();
+        if (uriString != null)
+        {
+            stmt.bindString(3, uriString);
+        }
+        stmt.bindLong(4, entity.getCategoryId());
+    }
+
+    @Override
+    protected void attachEntity(RssSource entity)
+    {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected Long updateKeyAfterInsert(RssSource entity, long rowId)
+    {
+        entity.setId(rowId);
+        return rowId;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected boolean isEntityUpdateable()
+    {
+        return true;
+    }
+
+    protected String getSelectDeep()
+    {
+        if (selectDeep == null)
+        {
+            StringBuilder builder = new StringBuilder("SELECT ");
+            SqlUtils.appendColumns(builder, "T", getAllColumns());
+            builder.append(',');
+            SqlUtils.appendColumns(builder, "T0", daoSession.getCategoryDao().getAllColumns());
+            builder.append(" FROM RSS_SOURCE T");
+            builder.append(" LEFT JOIN CATEGORY T0 ON T.'CATEGORY_ID'=T0.'_id'");
+            builder.append(' ');
+            selectDeep = builder.toString();
+        }
+        return selectDeep;
+    }
+
+    protected RssSource loadCurrentDeep(Cursor cursor, boolean lock)
+    {
+        RssSource entity = loadCurrent(cursor, 0, lock);
+        int offset = getAllColumns().length;
+
+        Category category = loadCurrentOther(daoSession.getCategoryDao(), cursor, offset);
+        if (category != null)
+        {
+            entity.setCategory(category);
+        }
+
+        return entity;
+    }
+
     protected List<RssSource> loadDeepAllAndCloseCursor(Cursor cursor)
     {
         try
@@ -294,15 +303,6 @@ public class RssSourceDao extends AbstractDao<RssSource, Long>
         {
             cursor.close();
         }
-    }
-
-    /**
-     * A raw-style query where you can pass any WHERE clause and arguments.
-     */
-    public List<RssSource> queryDeep(String where, String... selectionArg)
-    {
-        Cursor cursor = db.rawQuery(getSelectDeep() + where, selectionArg);
-        return loadDeepAllAndCloseCursor(cursor);
     }
 
     /**

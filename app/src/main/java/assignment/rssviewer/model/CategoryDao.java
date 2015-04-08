@@ -56,34 +56,6 @@ public class CategoryDao extends AbstractDao<Category, Long>
      * @inheritdoc
      */
     @Override
-    protected void bindValues(SQLiteStatement stmt, Category entity)
-    {
-        stmt.clearBindings();
-
-        Long id = entity.getId();
-        if (id != null)
-        {
-            stmt.bindLong(1, id);
-        }
-
-        String name = entity.getName();
-        if (name != null)
-        {
-            stmt.bindString(2, name);
-        }
-    }
-
-    @Override
-    protected void attachEntity(Category entity)
-    {
-        super.attachEntity(entity);
-        entity.__setDaoSession(daoSession);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
     public Long readKey(Cursor cursor, int offset)
     {
         return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
@@ -116,16 +88,6 @@ public class CategoryDao extends AbstractDao<Category, Long>
      * @inheritdoc
      */
     @Override
-    protected Long updateKeyAfterInsert(Category entity, long rowId)
-    {
-        entity.setId(rowId);
-        return rowId;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
     public Long getKey(Category entity)
     {
         if (entity != null)
@@ -136,6 +98,44 @@ public class CategoryDao extends AbstractDao<Category, Long>
         {
             return null;
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected void bindValues(SQLiteStatement stmt, Category entity)
+    {
+        stmt.clearBindings();
+
+        Long id = entity.getId();
+        if (id != null)
+        {
+            stmt.bindLong(1, id);
+        }
+
+        String name = entity.getName();
+        if (name != null)
+        {
+            stmt.bindString(2, name);
+        }
+    }
+
+    @Override
+    protected void attachEntity(Category entity)
+    {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected Long updateKeyAfterInsert(Category entity, long rowId)
+    {
+        entity.setId(rowId);
+        return rowId;
     }
 
     /**

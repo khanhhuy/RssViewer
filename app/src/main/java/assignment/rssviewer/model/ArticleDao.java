@@ -66,59 +66,6 @@ public class ArticleDao extends AbstractDao<Article, Long>
      * @inheritdoc
      */
     @Override
-    protected void bindValues(SQLiteStatement stmt, Article entity)
-    {
-        stmt.clearBindings();
-
-        Long id = entity.getId();
-        if (id != null)
-        {
-            stmt.bindLong(1, id);
-        }
-
-        java.util.Date publishDate = entity.getPublishDate();
-        if (publishDate != null)
-        {
-            stmt.bindLong(2, publishDate.getTime());
-        }
-
-        String title = entity.getTitle();
-        if (title != null)
-        {
-            stmt.bindString(3, title);
-        }
-
-        Boolean isRead = entity.getIsRead();
-        if (isRead != null)
-        {
-            stmt.bindLong(4, isRead ? 1l : 0l);
-        }
-
-        String description = entity.getDescription();
-        if (description != null)
-        {
-            stmt.bindString(5, description);
-        }
-
-        String uriString = entity.getUriString();
-        if (uriString != null)
-        {
-            stmt.bindString(6, uriString);
-        }
-        stmt.bindLong(7, entity.getRssSourceId());
-    }
-
-    @Override
-    protected void attachEntity(Article entity)
-    {
-        super.attachEntity(entity);
-        entity.__setDaoSession(daoSession);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
     public Long readKey(Cursor cursor, int offset)
     {
         return cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0);
@@ -161,16 +108,6 @@ public class ArticleDao extends AbstractDao<Article, Long>
      * @inheritdoc
      */
     @Override
-    protected Long updateKeyAfterInsert(Article entity, long rowId)
-    {
-        entity.setId(rowId);
-        return rowId;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
     public Long getKey(Article entity)
     {
         if (entity != null)
@@ -181,45 +118,6 @@ public class ArticleDao extends AbstractDao<Article, Long>
         {
             return null;
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    @Override
-    protected boolean isEntityUpdateable()
-    {
-        return true;
-    }
-
-    protected String getSelectDeep()
-    {
-        if (selectDeep == null)
-        {
-            StringBuilder builder = new StringBuilder("SELECT ");
-            SqlUtils.appendColumns(builder, "T", getAllColumns());
-            builder.append(',');
-            SqlUtils.appendColumns(builder, "T0", daoSession.getRssSourceDao().getAllColumns());
-            builder.append(" FROM ARTICLE T");
-            builder.append(" LEFT JOIN RSS_SOURCE T0 ON T.'RSS_SOURCE_ID'=T0.'_id'");
-            builder.append(' ');
-            selectDeep = builder.toString();
-        }
-        return selectDeep;
-    }
-
-    protected Article loadCurrentDeep(Cursor cursor, boolean lock)
-    {
-        Article entity = loadCurrent(cursor, 0, lock);
-        int offset = getAllColumns().length;
-
-        RssSource rssSource = loadCurrentOther(daoSession.getRssSourceDao(), cursor, offset);
-        if (rssSource != null)
-        {
-            entity.setRssSource(rssSource);
-        }
-
-        return entity;
     }
 
     public Article loadDeep(Long key)
@@ -290,6 +188,117 @@ public class ArticleDao extends AbstractDao<Article, Long>
         return list;
     }
 
+    /**
+     * A raw-style query where you can pass any WHERE clause and arguments.
+     */
+    public List<Article> queryDeep(String where, String... selectionArg)
+    {
+        Cursor cursor = db.rawQuery(getSelectDeep() + where, selectionArg);
+        return loadDeepAllAndCloseCursor(cursor);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected void bindValues(SQLiteStatement stmt, Article entity)
+    {
+        stmt.clearBindings();
+
+        Long id = entity.getId();
+        if (id != null)
+        {
+            stmt.bindLong(1, id);
+        }
+
+        java.util.Date publishDate = entity.getPublishDate();
+        if (publishDate != null)
+        {
+            stmt.bindLong(2, publishDate.getTime());
+        }
+
+        String title = entity.getTitle();
+        if (title != null)
+        {
+            stmt.bindString(3, title);
+        }
+
+        Boolean isRead = entity.getIsRead();
+        if (isRead != null)
+        {
+            stmt.bindLong(4, isRead ? 1l : 0l);
+        }
+
+        String description = entity.getDescription();
+        if (description != null)
+        {
+            stmt.bindString(5, description);
+        }
+
+        String uriString = entity.getUriString();
+        if (uriString != null)
+        {
+            stmt.bindString(6, uriString);
+        }
+        stmt.bindLong(7, entity.getRssSourceId());
+    }
+
+    @Override
+    protected void attachEntity(Article entity)
+    {
+        super.attachEntity(entity);
+        entity.__setDaoSession(daoSession);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected Long updateKeyAfterInsert(Article entity, long rowId)
+    {
+        entity.setId(rowId);
+        return rowId;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    @Override
+    protected boolean isEntityUpdateable()
+    {
+        return true;
+    }
+
+    protected String getSelectDeep()
+    {
+        if (selectDeep == null)
+        {
+            StringBuilder builder = new StringBuilder("SELECT ");
+            SqlUtils.appendColumns(builder, "T", getAllColumns());
+            builder.append(',');
+            SqlUtils.appendColumns(builder, "T0", daoSession.getRssSourceDao().getAllColumns());
+            builder.append(" FROM ARTICLE T");
+            builder.append(" LEFT JOIN RSS_SOURCE T0 ON T.'RSS_SOURCE_ID'=T0.'_id'");
+            builder.append(' ');
+            selectDeep = builder.toString();
+        }
+        return selectDeep;
+    }
+
+    protected Article loadCurrentDeep(Cursor cursor, boolean lock)
+    {
+        Article entity = loadCurrent(cursor, 0, lock);
+        int offset = getAllColumns().length;
+
+        RssSource rssSource = loadCurrentOther(daoSession.getRssSourceDao(), cursor, offset);
+        if (rssSource != null)
+        {
+            entity.setRssSource(rssSource);
+        }
+
+        return entity;
+    }
+
     protected List<Article> loadDeepAllAndCloseCursor(Cursor cursor)
     {
         try
@@ -300,15 +309,6 @@ public class ArticleDao extends AbstractDao<Article, Long>
         {
             cursor.close();
         }
-    }
-
-    /**
-     * A raw-style query where you can pass any WHERE clause and arguments.
-     */
-    public List<Article> queryDeep(String where, String... selectionArg)
-    {
-        Cursor cursor = db.rawQuery(getSelectDeep() + where, selectionArg);
-        return loadDeepAllAndCloseCursor(cursor);
     }
 
     /**

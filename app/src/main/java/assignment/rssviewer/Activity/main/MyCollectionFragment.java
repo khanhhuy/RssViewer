@@ -169,6 +169,13 @@ public class MyCollectionFragment extends Fragment
     };
 
     @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         thisView = inflater.inflate(R.layout.collection_layout, container, false);
@@ -225,6 +232,7 @@ public class MyCollectionFragment extends Fragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
         inflater.inflate(R.menu.menu_collection, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

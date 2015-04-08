@@ -11,12 +11,6 @@ import android.os.Bundle;
  */
 public class ConfirmDialog extends DialogFragment
 {
-    public interface OnClosedListener
-    {
-        public void onAccepted();
-        public void onCanceled();
-    }
-
     private String title;
     private String content;
     private OnClosedListener onClosedListener;
@@ -62,5 +56,12 @@ public class ConfirmDialog extends DialogFragment
     public void setOnClosedListener(OnClosedListener value)
     {
         this.onClosedListener = value;
+    }
+
+    public interface OnClosedListener
+    {
+        public void onAccepted();
+
+        public void onCanceled();
     }
 }

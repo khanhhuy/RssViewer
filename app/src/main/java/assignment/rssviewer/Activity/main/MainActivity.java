@@ -1,13 +1,17 @@
 package assignment.rssviewer.activity.main;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -19,66 +23,71 @@ import java.util.List;
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.DrawerAdapter;
 
-/**
- * The list item should be static, so the all-category item should not be placed in the list,
- * such functionality should be implemented in the FeedListFragment instead.
- * The drawer should be used for navigating between top-level activities only.
- */
 public class MainActivity extends ActionBarActivity
 {
-    // used for caching the drawer list items
-    // this is static because it doesn't change at runtime, which means any extended classes get the same items.
     private final List<DrawerAdapter.DrawerItem> drawerItems = new ArrayList<>();
-    // statically stores info for current activity position, used to consistently highlight selected item in drawer list
-    // because the drawer list is an instance member, so different activities have different drawer list instances
-    // default value is 0 -> when user first launches the app, the position 0 item is highlighted, which means the first activity
-    // in the list should launch at startup
     private int currentPosition = 0;
-    //private ListView drawerListView;
-    //private ArrayList<DrawerAdapter.DrawerItem> mlistTitle;
-    //private DrawerAdapter drawerAdapter;
-    //private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
+    private ListView lvDrawer;
+    private DrawerLayout drawerLayout;
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
-        //inflateChildView();
-        fillDrawerItems(drawerItems, true);
 
-        final ListView lvDrawer = (ListView) findViewById(R.id.left_drawer);
+        fillDrawerItems(drawerItems, true);
+        lvDrawer = (ListView) findViewById(R.id.left_drawer);
         DrawerAdapter drawerAdapter = new DrawerAdapter(this, drawerItems);
         lvDrawer.setAdapter(drawerAdapter);
         lvDrawer.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
 
-        final DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.basedrawer_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.basedrawer_layout);
+        drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
         lvDrawer.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id)
             {
-                drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener()
+                if (currentPosition != position)
                 {
-                    @Override
-                    public void onDrawerClosed(View drawerView)
-                    {
-                        super.onDrawerClosed(drawerView);
-
-                        if (currentPosition != position)
-                        {
-                            startFragment(drawerItems.get(position));
-                            currentPosition = position;
-                        }
-                    }
-                });
+                    if (startFragment(drawerItems.get(position)))
+                        currentPosition = position;
+                }
                 drawerLayout.closeDrawer(lvDrawer);
             }
         });
 
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close);
+        drawerLayout.setDrawerListener(drawerToggle);
+
         startFragment(drawerItems.get(0));
         lvDrawer.setItemChecked(0, true);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState)
+    {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
     }
 
     /**
@@ -121,7 +130,13 @@ public class MainActivity extends ActionBarActivity
         activityClasses.recycle();
     }
 
-    private void startFragment(DrawerAdapter.DrawerItem drawerItem)
+    /**
+     * Start fragment when a drawer item is selected
+     *
+     * @param drawerItem is the selected item
+     * @return true if fragment is started successfully, false otherwise
+     */
+    private boolean startFragment(DrawerAdapter.DrawerItem drawerItem)
     {
         try
         {
@@ -129,71 +144,12 @@ public class MainActivity extends ActionBarActivity
             frmTx.replace(R.id.content_frame, Fragment.instantiate(this, drawerItem.getFragmentName()));
             frmTx.commit();
             this.setTitle(drawerItem.getTitle());
+            return true;
         }
         catch (Exception ex)
         {
             Log.e("Error", "Error showing fragment.", ex);
+            return false;
         }
     }
-    //protected abstract void onSetContentView(View rootView); <-- not necessary anymore
-
-    //Dropdown in drawer
-    //http://stackoverflow.com/questions/23195740/how-to-implement-android-navigation-drawer-like-this#
-
-    /*protected abstract int getChildViewLayout();
-
-    *//**
- * Inflate child View and add it to Framelayout
- *//*
-    private void inflateChildView()
-    {
-        int childViewid = getChildViewLayout();
-        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(childViewid, null);
-        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_frame);
-        frameLayout.addView(view);
-    }*/
-
-    /**
-     * Start Activity from drawer
-     * the activity associated with the drawer item will be launched.
-     *
-     * @param position
-     */
-
-    /*private void selectItem(int position)
-    {
-        if (CURRENT_POSITION != position)
-        {
-            DrawerAdapter.DrawerItem drawerItem = drawerAdapter.getItem(position);
-            Class<?> activityClass = drawerItem.getFragmentName();
-            if (activityClass != null)
-            {
-                CURRENT_POSITION = position;
-                Intent intent = new Intent(this, activityClass);
-                startActivity(intent);
-            }
-            else
-            {
-                Log.e("Activity", String.format("Activity class for %s is not found.", drawerItem.getTitle()));
-            }
-        }
-        else
-        {
-            drawerLayout.closeDrawers();
-        }
-    }
-
-    *//**
- * Handle click on drawer's item
- *//*
-
-    private class DrawerItemClickListener implements ListView.OnItemClickListener
-    {
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id)
-        {
-            selectItem(position);
-        }
-    }*/
 }
