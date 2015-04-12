@@ -6,17 +6,21 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-/**
- * Created by Prozacs on 26/03/2015.
- */
 public class ConfirmDialog extends DialogFragment
 {
+    private static final String TITLE_KEY = "title";
+    private static final String CONTENT_KEY = "content";
     private String title;
     private String content;
     private OnClosedListener onClosedListener;
 
-    public static final String TITLE_KEY = "title";
-    public static final String CONTENT_KEY = "content";
+    public static Bundle createArgs(String title, String content)
+    {
+        Bundle bundle = new Bundle();
+        bundle.putString(TITLE_KEY, title);
+        bundle.putString(CONTENT_KEY, content);
+        return bundle;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)

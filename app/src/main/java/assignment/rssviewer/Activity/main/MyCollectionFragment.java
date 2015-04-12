@@ -3,19 +3,9 @@ package assignment.rssviewer.activity.main;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.SparseBooleanArray;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.ProgressBar;
+import android.view.*;
+import android.widget.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +20,9 @@ import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
+import assignment.rssviewer.utils.MainFragment;
 
-public class MyCollectionFragment extends Fragment
+public class MyCollectionFragment extends MainFragment
 {
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
@@ -168,6 +159,12 @@ public class MyCollectionFragment extends Fragment
         }
     };
 
+    public MyCollectionFragment()
+    {
+        setTitle("My Library");
+        setIconResource(R.drawable.ic_action_image_photo_library);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -252,6 +249,12 @@ public class MyCollectionFragment extends Fragment
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean isStatic()
+    {
+        return false;
+    }
+
     private void showCategoryView(long categoryId)
     {
         Intent categoryIntent = new Intent(getActivity(), CategoryActivity.class);
@@ -263,11 +266,7 @@ public class MyCollectionFragment extends Fragment
 
     private void createNewCategory()
     {
-        Bundle bundle = new Bundle();
-        bundle.putString("title", "New Category");
-        bundle.putString("content", "");
-        bundle.putBoolean("isNew", true);
-        bundle.putLong("id", 0);
+        Bundle bundle = EditCategoryDialog.createArgs("New Category", "", true, 0);
         editCategoryDialog.setArguments(bundle);
         editCategoryDialog.show(getActivity().getFragmentManager(), "editCategoryDialog");
     }
@@ -276,11 +275,7 @@ public class MyCollectionFragment extends Fragment
     {
         if (category != null)
         {
-            Bundle bundle = new Bundle();
-            bundle.putString(EditCategoryDialog.TITLE_KEY, "Edit Category");
-            bundle.putString(EditCategoryDialog.CONTENT_KEY, category.getName());
-            bundle.putBoolean(EditCategoryDialog.IS_NEW_KEY, false);
-            bundle.putLong(EditCategoryDialog.ID_KEY, category.getId());
+            Bundle bundle = EditCategoryDialog.createArgs("Edit Category", category.getName(), false, category.getId());
             editCategoryDialog.setArguments(bundle);
             editCategoryDialog.show(getActivity().getFragmentManager(), "editCategoryDialog");
         }
@@ -288,9 +283,7 @@ public class MyCollectionFragment extends Fragment
 
     private void removeCategories()
     {
-        Bundle bundle = new Bundle();
-        bundle.putString(ConfirmDialog.TITLE_KEY, "Confirm Deletion");
-        bundle.putString(ConfirmDialog.CONTENT_KEY, "Are you sure you want to remove these categories?");
+        Bundle bundle = ConfirmDialog.createArgs("Confirm Deletion", "Are you sure you want to remove these categories?");
         confirmDeletionDialog.setArguments(bundle);
         confirmDeletionDialog.show(getActivity().getFragmentManager(), "confirmDeletionDialog");
     }

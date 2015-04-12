@@ -11,21 +11,28 @@ import android.widget.EditText;
 
 import assignment.rssviewer.R;
 
-/**
- * Created by Prozacs on 25/03/2015.
- */
 public class EditCategoryDialog extends DialogFragment
 {
-    public static final String TITLE_KEY = "title";
-    public static final String CONTENT_KEY = "content";
-    public static final String IS_NEW_KEY = "isNew";
-    public static final String ID_KEY = "id";
+    private static final String TITLE_KEY = "title";
+    private static final String CONTENT_KEY = "content";
+    private static final String IS_NEW_KEY = "isNew";
+    private static final String ID_KEY = "id";
 
     private String title;
     private String content;
     private boolean isNew;
     private long id;
     private OnClosedListener listener;
+
+    public static Bundle createArgs(String title, String content, boolean isNew, long id)
+    {
+        Bundle bundle = new Bundle();
+        bundle.putString(TITLE_KEY, title);
+        bundle.putString(CONTENT_KEY, content);
+        bundle.putBoolean(IS_NEW_KEY, isNew);
+        bundle.putLong(ID_KEY, id);
+        return bundle;
+    }
 
     public void setOnClosedListener(OnClosedListener value)
     {

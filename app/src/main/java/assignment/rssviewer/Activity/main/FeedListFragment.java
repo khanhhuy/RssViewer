@@ -2,14 +2,8 @@ package assignment.rssviewer.activity.main;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -17,12 +11,25 @@ import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.PostListAdapter;
+import assignment.rssviewer.utils.MainFragment;
 import assignment.rssviewer.utils.PostData;
 
-public class FeedListFragment extends Fragment
+public class FeedListFragment extends MainFragment
 {
     private final List<PostData> listData = new ArrayList<>();
     private PostListAdapter adapter;
+
+    public FeedListFragment()
+    {
+        this.setTitle("Feed List");
+        this.setIconResource(R.drawable.ic_action_expand);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -62,6 +69,12 @@ public class FeedListFragment extends Fragment
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean isStatic()
+    {
+        return true;
     }
 
     /*@Override

@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,15 +19,18 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.DrawerAdapter;
+import assignment.rssviewer.utils.MainFragment;
 
 public class MainActivity extends ActionBarActivity
 {
     private final List<DrawerAdapter.DrawerItem> drawerItems = new ArrayList<>();
-    private int currentPos = 0, prevPos = 0;
+    private final HashMap<String, MainFragment> fragments = new HashMap<>();
+    private int currentPos = 0;
     private ActionBarDrawerToggle drawerToggle;
     private ListView lvDrawer;
     private DrawerLayout drawerLayout;
@@ -50,7 +54,7 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
 
-        fillDrawerItems(drawerItems, true);
+        initFragments(this, drawerItems, fragments, true);
         lvDrawer = (ListView) findViewById(R.id.left_drawer);
         DrawerAdapter drawerAdapter = new DrawerAdapter(this, drawerItems);
         lvDrawer.setAdapter(drawerAdapter);
@@ -64,31 +68,24 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id)
             {
-                currentPos = position;
+                if (position != currentPos)
+                {
+                    hideFragment(drawerItems.get(currentPos).getFragmentName());
+                    showFragment(drawerItems.get(position).getFragmentName(), false);
+                    currentPos = position;
+                }
                 drawerLayout.closeDrawer(lvDrawer);
             }
         });
 
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close)
-        {
-            @Override
-            public void onDrawerClosed(View drawerView)
-            {
-                super.onDrawerClosed(drawerView);
-                if (currentPos != prevPos)
-                {
-                    startFragment(drawerItems.get(currentPos));
-                    prevPos = currentPos;
-                }
-            }
-        };
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close);
         drawerLayout.setDrawerListener(drawerToggle);
-
-        startFragment(drawerItems.get(0));
-        lvDrawer.setItemChecked(0, true);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        showFragment(drawerItems.get(0).getFragmentName(), false);
+        lvDrawer.setItemChecked(0, true);
     }
 
     @Override
@@ -98,66 +95,85 @@ public class MainActivity extends ActionBarActivity
         drawerToggle.syncState();
     }
 
-    /**
-     * Crate Item in the left Drawer
-     * if DRAWER_ITEMS contains no items, we have to fill it with information in drawer_list.xml
-     * otherwise return the cached list.
-     */
-    private void fillDrawerItems(List<DrawerAdapter.DrawerItem> drawerItems, boolean clearFirst)
+    private static void initFragments(FragmentActivity activity,
+                                      List<DrawerAdapter.DrawerItem> drawerItems,
+                                      HashMap<String, MainFragment> fragments,
+                                      boolean clearFirst)
     {
         if (clearFirst)
+        {
             drawerItems.clear();
+            fragments.clear();
+        }
 
-        Resources resources = getResources();
-        TypedArray titles = resources.obtainTypedArray(R.array.title);
-        TypedArray icons = resources.obtainTypedArray(R.array.icon);
-        TypedArray activityClasses = resources.obtainTypedArray(R.array.activityClasses);
+        Resources resources = activity.getResources();
+        TypedArray fragmentClasses = resources.obtainTypedArray(R.array.fragmentClasses);
+        FragmentTransaction frmTx = activity.getSupportFragmentManager().beginTransaction();
 
-        Log.d("Array length", (Integer.valueOf(titles.length()).toString()));
-
-        for (int i = 0; i < titles.length(); i++)
+        for (int i = 0; i < fragmentClasses.length(); i++)
         {
             try
             {
+                String frmName = fragmentClasses.getString(i);
+                MainFragment fragment = (MainFragment) Fragment.instantiate(activity, frmName);
                 DrawerAdapter.DrawerItem drawerItem = new DrawerAdapter.DrawerItem();
-                drawerItem.setTitle(titles.getString(i));
-                drawerItem.setIcon(icons.getResourceId(i, -1));
-                drawerItem.setFragmentName(activityClasses.getString(i));
-                Log.d("Title" + i + " ", drawerItem.getTitle());
-                Log.d("Thumbnail" + i + " ", drawerItem.getIcon().toString());
+                drawerItem.setTitle(fragment.getTitle());
+                drawerItem.setIcon(fragment.getIconResource());
+                drawerItem.setFragmentName(frmName);
                 drawerItems.add(drawerItem);
+
+                fragments.put(frmName, fragment);
+                if (fragment.isStatic())
+                {
+                    frmTx.add(R.id.content_frame, fragment);
+                    frmTx.hide(fragment);
+                }
             }
             catch (Exception ex)
             {
-                Log.e("Error", "Error creating drawer items", ex);
+                Log.e("Error", "Cannot initialize fragment", ex);
             }
         }
 
-        titles.recycle();
-        icons.recycle();
-        activityClasses.recycle();
+        fragmentClasses.recycle();
+        frmTx.commit();
     }
 
-    /**
-     * Start fragment when a drawer item is selected
-     *
-     * @param drawerItem is the selected item
-     * @return true if fragment is started successfully, false otherwise
-     */
-    private boolean startFragment(DrawerAdapter.DrawerItem drawerItem)
+    private void showFragment(String frmName, boolean addToBackStack)
     {
-        try
+        MainFragment fragment = fragments.get(frmName);
+        if (fragment != null)
         {
             FragmentTransaction frmTx = getSupportFragmentManager().beginTransaction();
-            frmTx.replace(R.id.content_frame, Fragment.instantiate(this, drawerItem.getFragmentName()));
+            if (!fragment.isStatic())
+            {
+                frmTx.add(R.id.content_frame, fragment);
+            }
+
+            frmTx.show(fragment);
+            this.setTitle(fragment.getTitle());
+
+            if (addToBackStack)
+                frmTx.addToBackStack(null);
             frmTx.commit();
-            this.setTitle(drawerItem.getTitle());
-            return true;
         }
-        catch (Exception ex)
+    }
+
+    private void hideFragment(String frmName)
+    {
+        MainFragment fragment = fragments.get(frmName);
+        if (fragment != null)
         {
-            Log.e("Error", "Error showing fragment.", ex);
-            return false;
+            FragmentTransaction frmTx = getSupportFragmentManager().beginTransaction();
+            if (fragment.isStatic())
+            {
+                frmTx.hide(fragment);
+            }
+            else
+            {
+                frmTx.remove(fragment);
+            }
+            frmTx.commit();
         }
     }
 }
