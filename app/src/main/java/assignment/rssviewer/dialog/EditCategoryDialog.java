@@ -44,7 +44,7 @@ public class EditCategoryDialog extends DialogFragment
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View contentView = inflater.inflate(R.layout.new_category_dialog_layout, null);
+        View contentView = inflater.inflate(R.layout.dialog_new_category, null);
         final EditText txtContent = (EditText) contentView.findViewById(R.id.txtName);
         txtContent.setText(content);
 

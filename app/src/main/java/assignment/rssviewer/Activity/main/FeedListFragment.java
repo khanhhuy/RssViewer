@@ -34,10 +34,10 @@ public class FeedListFragment extends MainFragment
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.feed_list_layout, container, false);
+        View view = inflater.inflate(R.layout.fragment_feed_list, container, false);
 
         generateDummyData(listData);
-        adapter = new PostListAdapter(getActivity(), R.layout.feed_item_layout, listData);
+        adapter = new PostListAdapter(getActivity(), R.layout.list_item_feed, listData);
         ListView listView = (ListView) view.findViewById(R.id.postListView);
 
         if (listView == null)
@@ -80,13 +80,13 @@ public class FeedListFragment extends MainFragment
     /*@Override
     protected int getChildViewLayout()
     {
-        return R.layout.feed_list_layout;
+        return R.layout.fragment_feed_list;
     }*/
 
     /*@Override
     protected void onSetContentView(View rootView) {
         generateDummyData();
-        adapter = new PostListAdapter(this, R.layout.feed_item_layout, listData);
+        adapter = new PostListAdapter(this, R.layout.list_item_feed, listData);
         ListView listView = (ListView) rootView.findViewById(R.id.postListView);
 
         if (listView == null)

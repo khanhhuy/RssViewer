@@ -20,7 +20,7 @@ public class DrawerAdapter extends ArrayAdapter<DrawerAdapter.DrawerItem>
 
     public DrawerAdapter(Context context, List<DrawerItem> drawerItems)
     {
-        super(context, R.layout.drawer_item_layout, R.id.titleText, drawerItems);
+        super(context, R.layout.list_item_nav_drawer, R.id.titleText, drawerItems);
         this.drawerItems = drawerItems;
     }
 

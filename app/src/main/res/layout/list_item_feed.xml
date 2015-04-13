@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    >
+    <ImageView
+        android:id="@+id/imgThumbnail"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/ic_launcher"
+        android:scaleType="centerCrop"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/postTitleLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/imgThumbnail"
+        android:layout_toRightOf="@id/imgThumbnail"
+        android:maxLines="2"
+        android:text="Title will span for maximum in 2 lines"
+        android:textIsSelectable="false"
+        android:textSize="16sp"
+        android:ellipsize="end"
+        />
+
+    <TextView
+        android:id="@+id/postDateLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@id/imgThumbnail"
+        android:layout_toRightOf="@id/imgThumbnail"
+        android:maxLines="1"
+        android:text="April 1, 2015"
+        android:textSize="12sp"
+        />
+</RelativeLayout>

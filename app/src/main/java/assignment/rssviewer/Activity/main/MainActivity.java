@@ -52,7 +52,7 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_layout);
+        setContentView(R.layout.activity_main);
 
         initFragments(this, drawerItems, fragments, true);
         lvDrawer = (ListView) findViewById(R.id.left_drawer);

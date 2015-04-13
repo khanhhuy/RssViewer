@@ -8,8 +8,10 @@ import android.view.MenuItem;
 import android.widget.ListView;
 
 import assignment.rssviewer.R;
-import assignment.rssviewer.adapter.SourceAdapter;
+import assignment.rssviewer.adapter.SourceViewAdapter;
+import assignment.rssviewer.adapter.ViewHolderAdapter;
 import assignment.rssviewer.model.Category;
+import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 
@@ -17,6 +19,8 @@ public class CategoryActivity extends ActionBarActivity
 {
     public static final String ID_KEY = "id";
     private IDataService dataService;
+    private Category currentCategory;
+    private ViewHolderAdapter<RssSource> sourceAdapter;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
@@ -33,6 +37,13 @@ public class CategoryActivity extends ActionBarActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
+        switch (item.getItemId())
+        {
+            case R.id.action_new:
+                newSource();
+                return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -40,27 +51,43 @@ public class CategoryActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.category_layout);
+        setContentView(R.layout.activity_category);
 
         RssApplication application = (RssApplication) getApplication();
         dataService = application.getDataService();
 
-        displayData();
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        long categoryId = bundle.getLong(ID_KEY);
+
+        displayData(categoryId);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void displayData()
+    private void displayData(long categoryId)
     {
-        Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
-
-        Category category = dataService.getEntityById(Category.class, bundle.getLong(ID_KEY));
-        if (category != null)
+        currentCategory = dataService.getEntityById(Category.class, categoryId);
+        if (currentCategory != null)
         {
-            setTitle(category.getName());
+            setTitle(currentCategory.getName());
             ListView lvSources = (ListView) findViewById(R.id.lvSources);
-            SourceAdapter adapter = new SourceAdapter(this, category.getRssSources());
-            lvSources.setAdapter(adapter);
+            sourceAdapter = new SourceViewAdapter(this, currentCategory.getRssSources());
+            lvSources.setAdapter(sourceAdapter);
         }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        sourceAdapter.notifyDataSetChanged();
+    }
+
+    private void newSource()
+    {
+        Bundle args = AddSourceActivity.createArgs(currentCategory.getId());
+        Intent intent = new Intent(this, AddSourceActivity.class);
+        intent.putExtras(args);
+        startActivity(intent);
     }
 }

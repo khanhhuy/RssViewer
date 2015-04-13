@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingTop="3dip"
+              android:paddingBottom="3dip"
+              android:background="?android:attr/activatedBackgroundIndicator"
+              android:minHeight="?android:attr/listPreferredItemHeight">
+	<ImageButton
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:layout_gravity="center"
+		android:src="@drawable/ic_action_new_light"
+		android:id="@+id/addButton"/>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:orientation="vertical">
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5dp"
+			android:layout_marginStart="5dp"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:text="Source Name"
+			android:id="@android:id/text1"
+			android:singleLine="true"/>
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:layout_marginStart="5dp"
+			android:layout_marginLeft="5dp"
+			android:text="http://rss.source1.com"
+			android:id="@android:id/text2"
+			android:singleLine="true"/>
+	</LinearLayout>
+
+</LinearLayout>

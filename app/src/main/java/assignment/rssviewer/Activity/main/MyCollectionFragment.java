@@ -12,7 +12,8 @@ import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.activity.CategoryActivity;
-import assignment.rssviewer.adapter.CategoryAdapter;
+import assignment.rssviewer.adapter.CategoryListAdapter;
+import assignment.rssviewer.adapter.ViewHolderAdapter;
 import assignment.rssviewer.dialog.ConfirmDialog;
 import assignment.rssviewer.dialog.EditCategoryDialog;
 import assignment.rssviewer.model.Category;
@@ -27,7 +28,7 @@ public class MyCollectionFragment extends MainFragment
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
     private ListView lvCategories;
-    private CategoryAdapter categoryAdapter;
+    private CategoryListAdapter categoryAdapter;
     private ProgressBar progressBar;
     private IDataService dataService;
     private View thisView;
@@ -175,7 +176,7 @@ public class MyCollectionFragment extends MainFragment
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        thisView = inflater.inflate(R.layout.collection_layout, container, false);
+        thisView = inflater.inflate(R.layout.fragment_my_collection, container, false);
 
         RssApplication application = (RssApplication) getActivity().getApplication();
         dataService = application.getDataService();
@@ -196,7 +197,8 @@ public class MyCollectionFragment extends MainFragment
                         {
                             if (loadResult.isSuccessful())
                             {
-                                categoryAdapter = new CategoryAdapter(getActivity(), loadResult.getResult());
+                                categoryAdapter = new CategoryListAdapter(MyCollectionFragment.this.getActivity(),
+                                                                          loadResult.getResult());
                                 lvCategories.setAdapter(categoryAdapter);
                                 setIsBusy(false);
                             }
@@ -253,6 +255,14 @@ public class MyCollectionFragment extends MainFragment
     public boolean isStatic()
     {
         return false;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        if (categoryAdapter != null)
+            categoryAdapter.notifyDataSetChanged();
     }
 
     private void showCategoryView(long categoryId)

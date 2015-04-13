@@ -4,11 +4,37 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import java.util.List;
 
 import assignment.rssviewer.R;
+import assignment.rssviewer.adapter.CategorySpinnerAdapter;
+import assignment.rssviewer.model.Category;
+import assignment.rssviewer.model.RssSource;
+import assignment.rssviewer.service.IDataService;
+import assignment.rssviewer.service.RssApplication;
+import assignment.rssviewer.utils.Action;
+import assignment.rssviewer.utils.AsyncResult;
 
 public class EditSourceActivity extends ActionBarActivity
 {
+    private static final String ID_KEY = "id";
+
+    private IDataService dataService;
+    private RssSource rssSource;
+    private EditText titleText;
+    private Spinner categorySpinner;
+
+    public static Bundle createArgs(long id)
+    {
+        Bundle bundle = new Bundle();
+        bundle.putLong(ID_KEY, id);
+        return bundle;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -38,6 +64,35 @@ public class EditSourceActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.edit_source_layout);
+        setContentView(R.layout.activity_edit_rss_source);
+
+        RssApplication application = (RssApplication) getApplication();
+        dataService = application.getDataService();
+
+        Bundle args = getIntent().getExtras();
+        long sourceId = args.getLong(ID_KEY);
+        rssSource = dataService.getEntityById(RssSource.class, sourceId);
+
+        TextView uriText = (TextView) findViewById(R.id.uriText);
+        uriText.setText(rssSource.getUriString());
+
+        titleText = (EditText) findViewById(R.id.titleText);
+        titleText.setText(rssSource.getName());
+
+        categorySpinner = (Spinner) findViewById(R.id.categorySpinner);
+
+        dataService.loadAllEntitiesAsync(Category.class, new Action<AsyncResult<List<Category>>>()
+        {
+            @Override
+            public void execute(AsyncResult<List<Category>> result)
+            {
+                if (result.isSuccessful())
+                {
+                    CategorySpinnerAdapter spinnerAdapter = new CategorySpinnerAdapter(EditSourceActivity.this, result.getResult());
+                    categorySpinner.setAdapter(spinnerAdapter);
+                    categorySpinner.setSelection(spinnerAdapter.getPosition(rssSource.getCategory()));
+                }
+            }
+        });
     }
 }
