@@ -96,7 +96,7 @@ public class AddSourceActivity extends ActionBarActivity
         dataService = ((RssApplication) getApplication()).getDataService();
         currentCategory = dataService.loadById(Category.class, categoryId);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void hideKeyboard(View view)

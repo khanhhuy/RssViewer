@@ -2,8 +2,12 @@ package assignment.rssviewer.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,6 +31,40 @@ public class EditSourceActivity extends ActionBarActivity
     private RssSource rssSource;
     private EditText titleText;
     private Spinner categorySpinner;
+    private MenuItem saveMenuItem;
+
+    private TextWatcher titleTextWatcher = new TextWatcher()
+    {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after)
+        {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count)
+        {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s)
+        {
+            notifyValueChanged();
+        }
+    };
+
+    private AdapterView.OnItemSelectedListener categorySelectedListener = new AdapterView.OnItemSelectedListener()
+    {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+        {
+            notifyValueChanged();
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent)
+        {
+        }
+    };
 
     public static Bundle createArgs(long sourceId)
     {
@@ -41,6 +79,14 @@ public class EditSourceActivity extends ActionBarActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_edit_source, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        saveMenuItem = menu.findItem(R.id.action_save);
+        setEnabled(saveMenuItem, false);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -110,8 +156,10 @@ public class EditSourceActivity extends ActionBarActivity
 
         titleText = (EditText) findViewById(R.id.titleText);
         titleText.setText(rssSource.getName());
+        titleText.addTextChangedListener(titleTextWatcher);
 
         categorySpinner = (Spinner) findViewById(R.id.categorySpinner);
+        categorySpinner.setOnItemSelectedListener(categorySelectedListener);
 
         dataService.loadAllAsync(Category.class, new Action<AsyncResult<List<Category>>>()
         {
@@ -126,5 +174,22 @@ public class EditSourceActivity extends ActionBarActivity
                 }
             }
         });
+    }
+
+    private void setEnabled(MenuItem menuItem, boolean value)
+    {
+        menuItem.setEnabled(value);
+        menuItem.getIcon().setAlpha(value ? 255 : 130);
+    }
+
+    private void notifyValueChanged()
+    {
+        String newTitle = titleText.getText().toString();
+        Category newCategory = (Category) categorySpinner.getSelectedItem();
+
+        boolean isChanged = !rssSource.getName().equals(newTitle) ||
+                (rssSource.getCategoryId() != newCategory.getId());
+
+        setEnabled(saveMenuItem, isChanged);
     }
 }

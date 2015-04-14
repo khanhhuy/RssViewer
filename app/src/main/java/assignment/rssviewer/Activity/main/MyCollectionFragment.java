@@ -69,7 +69,7 @@ public class MyCollectionFragment extends MainFragment
             switch (item.getItemId())
             {
                 case R.id.action_remove:
-                    removeCategories();
+                    confirmRemoving();
                     mode.finish();
                     return true;
                 case R.id.action_edit:
@@ -290,7 +290,7 @@ public class MyCollectionFragment extends MainFragment
         }
     }
 
-    private void removeCategories()
+    private void confirmRemoving()
     {
         Bundle bundle = ConfirmDialog.createArgs("Confirm Deletion", "Are you sure you want to remove these categories?");
         confirmDeletionDialog.setArguments(bundle);

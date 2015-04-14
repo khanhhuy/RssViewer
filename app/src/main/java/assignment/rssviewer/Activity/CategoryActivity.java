@@ -3,19 +3,24 @@ package assignment.rssviewer.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
+import android.view.*;
+import android.widget.AbsListView;
 import android.widget.ListView;
+
+import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.SourceViewAdapter;
 import assignment.rssviewer.adapter.ViewHolderAdapter;
+import assignment.rssviewer.dialog.ConfirmDialog;
+import assignment.rssviewer.dialog.MessageDialog;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
+import assignment.rssviewer.utils.Action;
+import assignment.rssviewer.utils.AsyncResult;
+import assignment.rssviewer.utils.ListViewHelper;
 
 public class CategoryActivity extends ActionBarActivity
 {
@@ -23,8 +28,92 @@ public class CategoryActivity extends ActionBarActivity
     private IDataService dataService;
     private Category currentCategory;
     private ViewHolderAdapter<RssSource> sourceAdapter;
+    private ListView lvSources;
+    private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
 
-    @Override
+    private AbsListView.MultiChoiceModeListener lvSourcesMultiChoiceListener = new AbsListView.MultiChoiceModeListener()
+    {
+        @Override
+        public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked)
+        {
+            MenuItem menuItem = mode.getMenu().findItem(R.id.action_edit);
+            if (lvSources.getCheckedItemCount() == 1)
+            {
+                menuItem.setEnabled(true);
+                menuItem.getIcon().setAlpha(255);
+            }
+            else
+            {
+                menuItem.setEnabled(false);
+                menuItem.getIcon().setAlpha(130);
+            }
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu)
+        {
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.contextual_menu_category, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu)
+        {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item)
+        {
+            switch (item.getItemId())
+            {
+                case R.id.action_remove:
+                    confirmDeletion();
+                    mode.finish();
+                    return true;
+                case R.id.action_edit:
+                    editSource(ListViewHelper.getFirstSelectedItem(RssSource.class, lvSources));
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode)
+        {
+        }
+    };
+
+    private ConfirmDialog.OnClosedListener confirmDeletionOnClosedListener = new ConfirmDialog.OnClosedListener()
+    {
+        @Override
+        public void onAccepted()
+        {
+            final List<RssSource> selectedSources = ListViewHelper.getSelectedItems(RssSource.class, lvSources);
+
+            dataService.deleteAsync(RssSource.class, new Action<AsyncResult<Void>>()
+            {
+                @Override
+                public void execute(AsyncResult<Void> result)
+                {
+                    if (result.isSuccessful())
+                    {
+                        for (RssSource s : selectedSources)
+                            sourceAdapter.remove(s);
+                    }
+                }
+            }, selectedSources);
+        }
+
+        @Override
+        public void onCanceled()
+        {
+        }
+    };
+
     public boolean onCreateOptionsMenu(Menu menu)
     {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -63,7 +152,7 @@ public class CategoryActivity extends ActionBarActivity
         long categoryId = bundle.getLong(ID_KEY);
 
         displayData(categoryId);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        confirmDeletionDialog.setOnClosedListener(confirmDeletionOnClosedListener);
     }
 
     @Override
@@ -79,11 +168,13 @@ public class CategoryActivity extends ActionBarActivity
         if (currentCategory != null)
         {
             setTitle(currentCategory.getName());
-            ListView lvSources = (ListView) findViewById(R.id.lvSources);
+            lvSources = (ListView) findViewById(R.id.lvSources);
             sourceAdapter = new SourceViewAdapter(this, currentCategory.getRssSources());
             lvSources.setAdapter(sourceAdapter);
+            lvSources.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+            lvSources.setMultiChoiceModeListener(lvSourcesMultiChoiceListener);
 
-            lvSources.setOnItemClickListener(new AdapterView.OnItemClickListener()
+/*            lvSources.setOnItemClickListener(new AdapterView.OnItemClickListener()
             {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id)
@@ -91,7 +182,7 @@ public class CategoryActivity extends ActionBarActivity
                     RssSource rssSource = sourceAdapter.getItem(position);
                     editSource(rssSource.getId());
                 }
-            });
+            });*/
         }
     }
 
@@ -103,11 +194,21 @@ public class CategoryActivity extends ActionBarActivity
         startActivity(intent);
     }
 
-    private void editSource(long sourceId)
+    private void editSource(RssSource source)
     {
-        Bundle args = EditSourceActivity.createArgs(sourceId);
-        Intent intent = new Intent(this, EditSourceActivity.class);
-        intent.putExtras(args);
-        startActivity(intent);
+        if (source != null)
+        {
+            Bundle args = EditSourceActivity.createArgs(source.getId());
+            Intent intent = new Intent(this, EditSourceActivity.class);
+            intent.putExtras(args);
+            startActivity(intent);
+        }
+    }
+
+    private void confirmDeletion()
+    {
+        Bundle bundle = ConfirmDialog.createArgs("Confirm Deletion", "Are you sure you want to remove these sources?");
+        confirmDeletionDialog.setArguments(bundle);
+        confirmDeletionDialog.show(getFragmentManager(), "confirmDeletionDialog");
     }
 }

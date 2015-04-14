@@ -14,7 +14,7 @@ public class CategorySpinnerAdapter extends ViewHolderAdapter<Category>
 {
     public CategorySpinnerAdapter(Context context, List<Category> categories)
     {
-        super(context, android.R.layout.simple_list_item_1, categories);
+        super(context, android.R.layout.simple_spinner_item, categories);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class CategorySpinnerAdapter extends ViewHolderAdapter<Category>
     {
         if (convertView == null)
         {
-            convertView = inflater.inflate(layoutResource, parent, false);
+            convertView = inflater.inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
             Object holder = createHolder(convertView, position);
             convertView.setTag(holder);
         }
