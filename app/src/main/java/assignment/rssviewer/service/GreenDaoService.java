@@ -17,6 +17,7 @@ import de.greenrobot.dao.query.QueryBuilder;
 
 public class GreenDaoService implements IDataService
 {
+    private static final IllegalStateException illegalStateException = new IllegalStateException("There is no session to perform this operation.");
     private final Context context;
     private DaoSession daoSession;
 
@@ -52,7 +53,6 @@ public class GreenDaoService implements IDataService
                     {
                         DaoMaster daoMaster = new DaoMaster(result.getResult());
                         daoSession = daoMaster.newSession();
-
                         if (onCompleted != null)
                             onCompleted.execute(AsyncResult.VoidResult());
                     }
@@ -72,8 +72,8 @@ public class GreenDaoService implements IDataService
     }
 
     public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>>
-    loadAllEntitiesAsync(final Class<TEntity> entityClass,
-                         final Action<AsyncResult<List<TEntity>>> onCompleted)
+    loadAllAsync(final Class<TEntity> entityClass,
+                 final Action<AsyncResult<List<TEntity>>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<List<TEntity>>>()
         {
@@ -100,9 +100,9 @@ public class GreenDaoService implements IDataService
     }
 
     public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>>
-    loadAllEntitiesAsync(final Class<TEntity> entityClass,
-                         final Action<AsyncResult<List<TEntity>>> onCompleted,
-                         final SortDescription orderBy)
+    loadAllAsync(final Class<TEntity> entityClass,
+                 final Action<AsyncResult<List<TEntity>>> onCompleted,
+                 final SortDescription orderBy)
     {
         return new AsyncTask<Void, Void, AsyncResult<List<TEntity>>>()
         {
@@ -144,8 +144,8 @@ public class GreenDaoService implements IDataService
     }
 
     public <TEntity> AsyncTask<Void, Void, AsyncResult<TEntity>>
-    insertEntityAsync(final TEntity entity,
-                      final Action<AsyncResult<TEntity>> onCompleted)
+    insertAsync(final TEntity entity,
+                final Action<AsyncResult<TEntity>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<TEntity>>()
         {
@@ -172,15 +172,15 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
-    public <TEntity, TKey> TEntity getEntityById(final Class<TEntity> entityClass, TKey id)
+    public <TEntity, TKey> TEntity loadById(final Class<TEntity> entityClass, TKey id)
     {
         return daoSession.load(entityClass, id);
     }
 
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
-    deleteEntityAsync(final Class<TEntity> entityClass,
-                      final Action<AsyncResult<Void>> onCompleted,
-                      final TEntity... entities)
+    deleteAsync(final Class<TEntity> entityClass,
+                final Action<AsyncResult<Void>> onCompleted,
+                final TEntity entity)
     {
         return new AsyncTask<Void, Void, AsyncResult<Void>>()
         {
@@ -189,8 +189,7 @@ public class GreenDaoService implements IDataService
             {
                 try
                 {
-                    for (TEntity e : entities)
-                        daoSession.delete(e);
+                    daoSession.delete(entity);
                     return AsyncResult.VoidResult();
                 }
                 catch (Exception e)
@@ -206,37 +205,258 @@ public class GreenDaoService implements IDataService
                     onCompleted.execute(result);
             }
         }.execute();
+    }
+
+    public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
+    deleteAsync(final Class<TEntity> entityClass,
+                final Action<AsyncResult<Void>> onCompleted,
+                final Iterable<TEntity> entities)
+    {
+        return new AsyncTask<Void, Void, AsyncResult<Void>>()
+        {
+            @Override
+            protected final AsyncResult<Void> doInBackground(Void... params)
+            {
+                try
+                {
+                    daoSession.runInTx(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            for (TEntity e : entities)
+                            {
+                                daoSession.delete(e);
+                            }
+                        }
+                    });
+
+                    return AsyncResult.VoidResult();
+                }
+                catch (Exception e)
+                {
+                    return AsyncResult.FromException(e);
+                }
+            }
+
+            @Override
+            protected void onPostExecute(AsyncResult<Void> result)
+            {
+                if (onCompleted != null)
+                    onCompleted.execute(result);
+            }
+        }.execute();
+    }
+
+    public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
+    updateAsync(final Class<TEntity> entityClass,
+                final Action<AsyncResult<Void>> onCompleted,
+                final Iterable<TEntity> entities)
+    {
+        return new AsyncTask<Void, Void, AsyncResult<Void>>()
+        {
+            @Override
+            protected final AsyncResult<Void> doInBackground(Void... params)
+            {
+                try
+                {
+                    daoSession.runInTx(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            for (TEntity e : entities)
+                                daoSession.update(e);
+                        }
+                    });
+                    return AsyncResult.VoidResult();
+                }
+                catch (Exception e)
+                {
+                    return AsyncResult.FromException(e);
+                }
+            }
+
+            @Override
+            protected void onPostExecute(AsyncResult<Void> result)
+            {
+                if (onCompleted != null)
+                    onCompleted.execute(result);
+            }
+        }.execute();
+    }
+
+    public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
+    updateAsync(final Class<TEntity> entityClass,
+                final Action<AsyncResult<Void>> onCompleted,
+                final TEntity entity)
+    {
+        return new AsyncTask<Void, Void, AsyncResult<Void>>()
+        {
+            @Override
+            protected final AsyncResult<Void> doInBackground(Void... params)
+            {
+                try
+                {
+                    daoSession.update(entity);
+                    return AsyncResult.VoidResult();
+                }
+                catch (Exception e)
+                {
+                    return AsyncResult.FromException(e);
+                }
+            }
+
+            @Override
+            protected void onPostExecute(AsyncResult<Void> result)
+            {
+                if (onCompleted != null)
+                    onCompleted.execute(result);
+            }
+        }.execute();
+    }
+
+    /*@Override
+    public void initDatabase()
+    {
+        if (daoSession == null)
+        {
+            DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, context.getResources().getString(R.string.database_name), null);
+            DaoMaster daoMaster = new DaoMaster(helper.getWritableDatabase());
+            daoSession = daoMaster.newSession();
+        }
     }
 
     @Override
-    public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
-    updateEntityAsync(final Class<TEntity> entityClass,
-                      final Action<AsyncResult<Void>> onCompleted,
-                      final TEntity... entities)
+    public <T> List<T> loadAll(Class<T> entityClass) throws IllegalStateException
     {
-        return new AsyncTask<Void, Void, AsyncResult<Void>>()
+        if (daoSession == null)
+            throw illegalStateException;
+
+        return daoSession.loadAll(entityClass);
+    }
+
+    @Override
+    public <T> List<T> loadAll(Class<T> entityClass, SortDescription... orderBy) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+
+        AbstractDao<T, ?> dao = getDao(entityClass);
+        QueryBuilder<T> queryBuilder = dao.queryBuilder();
+
+        for (SortDescription condition : orderBy)
+        {
+            switch (condition.getOrder())
+            {
+                case ASCENDING:
+                    queryBuilder = queryBuilder.orderAsc(condition.getProperty());
+                    break;
+                case DESCENDING:
+                    queryBuilder = queryBuilder.orderDesc(condition.getProperty());
+                    break;
+            }
+        }
+
+        return queryBuilder.list();
+    }
+
+    @Override
+    public <T> void insert(final Iterable<T> entities) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+
+        daoSession.runInTx(new Runnable()
         {
             @Override
-            protected final AsyncResult<Void> doInBackground(Void... params)
+            public void run()
             {
-                try
+                for (T e : entities)
                 {
-                    for (TEntity e : entities)
-                        daoSession.update(e);
-                    return AsyncResult.VoidResult();
-                }
-                catch (Exception e)
-                {
-                    return AsyncResult.FromException(e);
+                    daoSession.insert(e);
                 }
             }
-
-            @Override
-            protected void onPostExecute(AsyncResult<Void> result)
-            {
-                if (onCompleted != null)
-                    onCompleted.execute(result);
-            }
-        }.execute();
+        });
     }
+
+    @Override
+    public <T> T insert(T entity) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+
+        daoSession.insert(entity);
+        return entity;
+    }
+
+    @Override
+    public <T, TKey> T loadByKey(Class<T> entityClass, TKey id) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+        return daoSession.load(entityClass, id);
+    }
+
+    @Override
+    public <T> void delete(final Iterable<T> entities) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+
+        daoSession.runInTx(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                for (T e : entities)
+                {
+                    daoSession.delete(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public <T> void delete(T entity) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+
+        daoSession.delete(entity);
+    }
+
+    @Override
+    public <T> void update(final Iterable<T> entities) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+
+        daoSession.runInTx(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                for (T e : entities)
+                {
+                    daoSession.update(e);
+                }
+            }
+        });
+    }
+
+    @Override
+    public <T> void update(T entity) throws IllegalStateException
+    {
+        if (daoSession == null)
+            throw illegalStateException;
+
+        daoSession.update(entity);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> AbstractDao<T, ?> getDao(Class<T> entityClass)
+    {
+        return (AbstractDao<T, ?>) daoSession.getDao(entityClass);
+    }*/
 }

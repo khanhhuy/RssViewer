@@ -2,6 +2,7 @@ package assignment.rssviewer.adapter;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
@@ -14,6 +15,20 @@ public class CategorySpinnerAdapter extends ViewHolderAdapter<Category>
     public CategorySpinnerAdapter(Context context, List<Category> categories)
     {
         super(context, android.R.layout.simple_list_item_1, categories);
+    }
+
+    @Override
+    public View getDropDownView(int position, View convertView, ViewGroup parent)
+    {
+        if (convertView == null)
+        {
+            convertView = inflater.inflate(layoutResource, parent, false);
+            Object holder = createHolder(convertView, position);
+            convertView.setTag(holder);
+        }
+
+        bindView(convertView.getTag(), getItem(position));
+        return convertView;
     }
 
     @Override

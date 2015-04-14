@@ -15,8 +15,8 @@ import java.util.List;
  */
 public abstract class ViewHolderAdapter<T> extends ArrayAdapter<T>
 {
-    private final LayoutInflater inflater;
-    private final int layoutResource;
+    protected final LayoutInflater inflater;
+    protected final int layoutResource;
 
     /**
      * Initializes a ViewHolderAdapter instance.

@@ -2,8 +2,9 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="assignment.rssviewer.activity.main.MyCollectionFragment">
-	<item android:id="@+id/action_new"
-	      android:title="@string/action_new"
-	      android:icon="@drawable/ic_action_new"
-	      app:showAsAction="ifRoom"/>
+	<item
+		android:id="@+id/action_new"
+		android:icon="@drawable/ic_action_new"
+		android:title="@string/action_new"
+		app:showAsAction="ifRoom"/>
 </menu>

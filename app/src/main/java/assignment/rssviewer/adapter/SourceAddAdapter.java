@@ -2,7 +2,6 @@ package assignment.rssviewer.adapter;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 

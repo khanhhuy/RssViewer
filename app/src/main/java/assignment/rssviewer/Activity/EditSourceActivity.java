@@ -21,17 +21,17 @@ import assignment.rssviewer.utils.AsyncResult;
 
 public class EditSourceActivity extends ActionBarActivity
 {
-    private static final String ID_KEY = "id";
+    private static final String SOURCE_ID_KEY = "source_id";
 
     private IDataService dataService;
     private RssSource rssSource;
     private EditText titleText;
     private Spinner categorySpinner;
 
-    public static Bundle createArgs(long id)
+    public static Bundle createArgs(long sourceId)
     {
         Bundle bundle = new Bundle();
-        bundle.putLong(ID_KEY, id);
+        bundle.putLong(SOURCE_ID_KEY, sourceId);
         return bundle;
     }
 
@@ -52,8 +52,40 @@ public class EditSourceActivity extends ActionBarActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
+        if (id == R.id.action_save)
         {
+            boolean isChanged = false;
+
+            String newTitle = titleText.getText().toString();
+            Category newCategory = (Category) categorySpinner.getSelectedItem();
+
+            if (!rssSource.getName().equals(newTitle))
+            {
+                isChanged = true;
+                rssSource.setName(newTitle);
+            }
+
+            if (rssSource.getCategoryId() != newCategory.getId())
+            {
+                Category oldCategory = rssSource.getCategory();
+                oldCategory.getRssSources().remove(rssSource);
+                newCategory.getRssSources().add(rssSource);
+                rssSource.setCategoryId(newCategory.getId());
+                isChanged = true;
+            }
+
+            if (isChanged)
+            {
+                dataService.updateAsync(RssSource.class, new Action<AsyncResult<Void>>()
+                {
+                    @Override
+                    public void execute(AsyncResult<Void> voidAsyncResult)
+                    {
+                        EditSourceActivity.this.onBackPressed();
+                    }
+                }, rssSource);
+            }
+
             return true;
         }
 
@@ -70,8 +102,8 @@ public class EditSourceActivity extends ActionBarActivity
         dataService = application.getDataService();
 
         Bundle args = getIntent().getExtras();
-        long sourceId = args.getLong(ID_KEY);
-        rssSource = dataService.getEntityById(RssSource.class, sourceId);
+        long sourceId = args.getLong(SOURCE_ID_KEY);
+        rssSource = dataService.loadById(RssSource.class, sourceId);
 
         TextView uriText = (TextView) findViewById(R.id.uriText);
         uriText.setText(rssSource.getUriString());
@@ -81,7 +113,7 @@ public class EditSourceActivity extends ActionBarActivity
 
         categorySpinner = (Spinner) findViewById(R.id.categorySpinner);
 
-        dataService.loadAllEntitiesAsync(Category.class, new Action<AsyncResult<List<Category>>>()
+        dataService.loadAllAsync(Category.class, new Action<AsyncResult<List<Category>>>()
         {
             @Override
             public void execute(AsyncResult<List<Category>> result)

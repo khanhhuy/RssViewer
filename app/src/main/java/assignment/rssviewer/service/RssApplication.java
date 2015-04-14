@@ -4,9 +4,6 @@ import android.app.Application;
 
 import assignment.rssviewer.model.RssSource;
 
-/**
- * Created by Prozacs on 25/03/2015.
- */
 public class RssApplication extends Application
 {
     private IDataService dataService;

@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import assignment.rssviewer.R;
@@ -64,18 +66,6 @@ public class CategoryActivity extends ActionBarActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void displayData(long categoryId)
-    {
-        currentCategory = dataService.getEntityById(Category.class, categoryId);
-        if (currentCategory != null)
-        {
-            setTitle(currentCategory.getName());
-            ListView lvSources = (ListView) findViewById(R.id.lvSources);
-            sourceAdapter = new SourceViewAdapter(this, currentCategory.getRssSources());
-            lvSources.setAdapter(sourceAdapter);
-        }
-    }
-
     @Override
     protected void onResume()
     {
@@ -83,10 +73,40 @@ public class CategoryActivity extends ActionBarActivity
         sourceAdapter.notifyDataSetChanged();
     }
 
+    private void displayData(long categoryId)
+    {
+        currentCategory = dataService.loadById(Category.class, categoryId);
+        if (currentCategory != null)
+        {
+            setTitle(currentCategory.getName());
+            ListView lvSources = (ListView) findViewById(R.id.lvSources);
+            sourceAdapter = new SourceViewAdapter(this, currentCategory.getRssSources());
+            lvSources.setAdapter(sourceAdapter);
+
+            lvSources.setOnItemClickListener(new AdapterView.OnItemClickListener()
+            {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+                {
+                    RssSource rssSource = sourceAdapter.getItem(position);
+                    editSource(rssSource.getId());
+                }
+            });
+        }
+    }
+
     private void newSource()
     {
         Bundle args = AddSourceActivity.createArgs(currentCategory.getId());
         Intent intent = new Intent(this, AddSourceActivity.class);
+        intent.putExtras(args);
+        startActivity(intent);
+    }
+
+    private void editSource(long sourceId)
+    {
+        Bundle args = EditSourceActivity.createArgs(sourceId);
+        Intent intent = new Intent(this, EditSourceActivity.class);
         intent.putExtras(args);
         startActivity(intent);
     }

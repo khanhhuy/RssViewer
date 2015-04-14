@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.SparseBooleanArray;
 import android.view.*;
-import android.widget.*;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +16,6 @@ import java.util.List;
 import assignment.rssviewer.R;
 import assignment.rssviewer.activity.CategoryActivity;
 import assignment.rssviewer.adapter.CategoryListAdapter;
-import assignment.rssviewer.adapter.ViewHolderAdapter;
 import assignment.rssviewer.dialog.ConfirmDialog;
 import assignment.rssviewer.dialog.EditCategoryDialog;
 import assignment.rssviewer.model.Category;
@@ -21,6 +23,7 @@ import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
+import assignment.rssviewer.utils.ListViewHelper;
 import assignment.rssviewer.utils.MainFragment;
 
 public class MyCollectionFragment extends MainFragment
@@ -28,11 +31,6 @@ public class MyCollectionFragment extends MainFragment
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
     private ListView lvCategories;
-    private CategoryListAdapter categoryAdapter;
-    private ProgressBar progressBar;
-    private IDataService dataService;
-    private View thisView;
-
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
         @Override
@@ -75,7 +73,7 @@ public class MyCollectionFragment extends MainFragment
                     mode.finish();
                     return true;
                 case R.id.action_edit:
-                    editCategory(getFirstSelectedCategory());
+                    editCategory(ListViewHelper.getFirstSelectedItem(Category.class, lvCategories));
                     mode.finish();
                     return true;
                 default:
@@ -88,48 +86,6 @@ public class MyCollectionFragment extends MainFragment
         {
         }
     };
-
-    private EditCategoryDialog.OnClosedListener editCategoryOnClosedListener = new EditCategoryDialog.OnClosedListener()
-    {
-        @Override
-        public void onAccepted(boolean isNew, long id, final String content)
-        {
-            Category category;
-            if (!isNew)
-            {
-                category = dataService.getEntityById(Category.class, id);
-                category.setName(content);
-                dataService.updateEntityAsync(Category.class, null, category);
-            }
-            else
-            {
-                setIsBusy(true);
-                category = new Category();
-                category.setName(content);
-
-                dataService.insertEntityAsync(category, new Action<AsyncResult<Category>>()
-                {
-                    @Override
-                    public void execute(AsyncResult<Category> result)
-                    {
-                        if (result.isSuccessful())
-                        {
-                            setIsBusy(false);
-                            categoryAdapter.add(result.getResult());
-                            showCategoryView(result.getResult().getId());
-                        }
-                    }
-                });
-            }
-            notifyCategoriesChanged();
-        }
-
-        @Override
-        public void onCanceled(boolean isNew, long id, String content)
-        {
-        }
-    };
-
     private ConfirmDialog.OnClosedListener confirmDeletionOnClosedListener = new ConfirmDialog.OnClosedListener()
     {
         @Override
@@ -137,9 +93,9 @@ public class MyCollectionFragment extends MainFragment
         public void onAccepted()
         {
             setIsBusy(true);
-            final Category[] selectedCategories = getSelectedCategories();
+            final List<Category> selectedCategories = ListViewHelper.getSelectedItems(Category.class, lvCategories);
 
-            dataService.deleteEntityAsync(Category.class, new Action<AsyncResult<Void>>()
+            dataService.deleteAsync(Category.class, new Action<AsyncResult<Void>>()
             {
                 @Override
                 public void execute(AsyncResult<Void> result)
@@ -156,6 +112,49 @@ public class MyCollectionFragment extends MainFragment
 
         @Override
         public void onCanceled()
+        {
+        }
+    };
+    private CategoryListAdapter categoryAdapter;
+    private ProgressBar progressBar;
+    private IDataService dataService;
+    private View thisView;
+    private EditCategoryDialog.OnClosedListener editCategoryOnClosedListener = new EditCategoryDialog.OnClosedListener()
+    {
+        @Override
+        public void onAccepted(boolean isNew, long id, final String content)
+        {
+            Category category;
+            if (!isNew)
+            {
+                category = dataService.loadById(Category.class, id);
+                category.setName(content);
+                dataService.updateAsync(Category.class, null, category);
+            }
+            else
+            {
+                setIsBusy(true);
+                category = new Category();
+                category.setName(content);
+
+                dataService.insertAsync(category, new Action<AsyncResult<Category>>()
+                {
+                    @Override
+                    public void execute(AsyncResult<Category> result)
+                    {
+                        if (result.isSuccessful())
+                        {
+                            setIsBusy(false);
+                            categoryAdapter.add(result.getResult());
+                            showCategoryView(result.getResult().getId());
+                        }
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onCanceled(boolean isNew, long id, String content)
         {
         }
     };
@@ -190,7 +189,7 @@ public class MyCollectionFragment extends MainFragment
             {
                 if (initResult.isSuccessful())
                 {
-                    dataService.loadAllEntitiesAsync(Category.class, new Action<AsyncResult<List<Category>>>()
+                    dataService.loadAllAsync(Category.class, new Action<AsyncResult<List<Category>>>()
                     {
                         @Override
                         public void execute(AsyncResult<List<Category>> loadResult)
@@ -349,10 +348,5 @@ public class MyCollectionFragment extends MainFragment
         if (progressBar == null)
             progressBar = (ProgressBar) thisView.findViewById(R.id.progressBar);
         progressBar.setIndeterminate(value);
-    }
-
-    private void notifyCategoriesChanged()
-    {
-        ((BaseAdapter) lvCategories.getAdapter()).notifyDataSetChanged();
     }
 }

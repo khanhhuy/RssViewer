@@ -2,14 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="assignment.rssviewer.activity.CategoryActivity"
-      app:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-	<item android:id="@+id/action_edit"
-	      android:title="@string/action_edit"
-	      android:icon="@drawable/ic_action_edit"
-	      app:showAsAction="ifRoom"/>
-	<item android:id="@+id/action_remove"
-	      android:title="@string/action_remove"
-	      android:icon="@drawable/ic_action_remove"
-	      app:showAsAction="ifRoom"/>
+      app:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+      tools:context="assignment.rssviewer.activity.CategoryActivity">
+	<item
+		android:id="@+id/action_edit"
+		android:icon="@drawable/ic_action_edit"
+		android:title="@string/action_edit"
+		app:showAsAction="ifRoom"/>
+	<item
+		android:id="@+id/action_remove"
+		android:icon="@drawable/ic_action_remove"
+		android:title="@string/action_remove"
+		app:showAsAction="ifRoom"/>
 </menu>

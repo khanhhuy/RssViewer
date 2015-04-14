@@ -15,9 +15,9 @@
 		android:text="@string/label_uri"/>
 
 	<TextView
+		android:id="@+id/uriText"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:id="@+id/uriText"
 		android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
 	<TextView

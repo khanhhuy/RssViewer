@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import de.greenrobot.dao.AbstractDao;
+import de.greenrobot.dao.DaoException;
 import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
 
@@ -98,6 +99,17 @@ public class CategoryDao extends AbstractDao<Category, Long>
         {
             return null;
         }
+    }
+
+    @Override
+    public void delete(Category entity)
+    {
+        if (daoSession == null)
+            throw new DaoException("Entity is detached from DAO context");
+
+        RssSourceDao childDao = daoSession.getRssSourceDao();
+        childDao.deleteInTx(entity.getRssSources());
+        super.delete(entity);
     }
 
     /**

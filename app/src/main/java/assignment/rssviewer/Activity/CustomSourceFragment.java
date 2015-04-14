@@ -30,12 +30,6 @@ import assignment.rssviewer.utils.Action;
  */
 public class CustomSourceFragment extends Fragment
 {
-    private OnFragmentInteractionListener mListener;
-    private EditText searchText;
-    private ListView resultList;
-    private ViewHolderAdapter<RssSource> resultAdapter;
-    private IRssService rssService;
-
     private final Action<RssSource> onItemSelected = new Action<RssSource>()
     {
         @Override
@@ -44,6 +38,11 @@ public class CustomSourceFragment extends Fragment
             mListener.onSourceSelected(rssSource);
         }
     };
+    private OnFragmentInteractionListener mListener;
+    private EditText searchText;
+    private ListView resultList;
+    private ViewHolderAdapter<RssSource> resultAdapter;
+    private IRssService rssService;
 
     public CustomSourceFragment()
     {
