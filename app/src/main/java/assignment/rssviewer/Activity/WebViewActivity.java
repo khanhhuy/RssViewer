@@ -1,19 +1,19 @@
 package assignment.rssviewer.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
+import android.widget.ShareActionProvider;
 
 import assignment.rssviewer.R;
 
 
-public class WebViewActivity extends ActionBarActivity {
+public class WebViewActivity extends Activity
+{
 
     private String url="";
     @Override
@@ -43,8 +43,8 @@ public class WebViewActivity extends ActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_web_view, menu);
 
-        MenuItem shareItem = (MenuItem) menu.findItem(R.id.action_share);
-        ShareActionProvider mShare = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+        MenuItem shareItem = menu.findItem(R.id.action_share);
+        ShareActionProvider mShare = (ShareActionProvider) shareItem.getActionProvider();
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setAction(Intent.ACTION_SEND);

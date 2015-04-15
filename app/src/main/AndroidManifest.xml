@@ -51,7 +51,11 @@
 		</activity>
 		<activity
 			android:name=".activity.WebViewActivity"
-			android:label="@string/title_activity_web_view" >
+			android:label="@string/title_activity_web_view"
+			android:parentActivityName=".activity.main.MainActivity">
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value=".activity.main.MainActivity"/>
 		</activity>
 	</application>
 
