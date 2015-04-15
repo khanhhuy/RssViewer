@@ -25,12 +25,11 @@ import assignment.rssviewer.utils.ListViewHelper;
 public class CategoryActivity extends Activity
 {
     public static final String ID_KEY = "id";
+    private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
     private IDataService dataService;
     private Category currentCategory;
     private ViewHolderAdapter<RssSource> sourceAdapter;
     private ListView lvSources;
-    private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
-
     private AbsListView.MultiChoiceModeListener lvSourcesMultiChoiceListener = new AbsListView.MultiChoiceModeListener()
     {
         @Override

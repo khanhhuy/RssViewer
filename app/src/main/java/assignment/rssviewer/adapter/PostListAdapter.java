@@ -11,7 +11,6 @@ import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.model.Article;
-import assignment.rssviewer.utils.PostData;
 
 
 /**

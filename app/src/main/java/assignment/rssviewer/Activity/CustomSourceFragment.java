@@ -20,7 +20,7 @@ import assignment.rssviewer.adapter.ViewHolderAdapter;
 import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.IRssService;
 import assignment.rssviewer.service.RssApplication;
-import assignment.rssviewer.utils.Action;
+import assignment.rssviewer.utils.*;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,10 +39,11 @@ public class CustomSourceFragment extends Fragment
         }
     };
     private OnFragmentInteractionListener mListener;
-    private EditText searchText;
-    private ListView resultList;
+    /*private EditText searchText;
+    private ListView resultList;*/
     private ViewHolderAdapter<RssSource> resultAdapter;
     private IRssService rssService;
+    private ListViewHelper.SupportWidget supportWidget;
 
     public CustomSourceFragment()
     {
@@ -58,8 +59,8 @@ public class CustomSourceFragment extends Fragment
         rssService = application.getRssService();
 
         View view = inflater.inflate(R.layout.fragment_custom_source, container, false);
-        searchText = (EditText) view.findViewById(R.id.searchText);
-        resultList = (ListView) view.findViewById(R.id.resultList);
+        EditText searchText = (EditText) view.findViewById(R.id.searchText);
+        ListView resultList = (ListView) view.findViewById(R.id.resultList);
 
         resultAdapter = new SourceAddAdapter(getActivity(), new ArrayList<RssSource>(), onItemSelected);
         resultList.setAdapter(resultAdapter);
@@ -76,6 +77,11 @@ public class CustomSourceFragment extends Fragment
                 return false;
             }
         });
+
+        View parent = view.findViewById(R.id.supportWidget);
+        View busyIndicator = view.findViewById(R.id.busyIndicator);
+        View emptyText = view.findViewById(R.id.emptyText);
+        supportWidget = new ListViewHelper.SupportWidget(resultList, parent, busyIndicator, emptyText);
 
         return view;
     }
@@ -104,10 +110,46 @@ public class CustomSourceFragment extends Fragment
 
     private void performSearch(String text)
     {
-        RssSource source = rssService.parse(text);
-        resultAdapter.clear();
-        if (source != null)
-            resultAdapter.add(source);
+        AsyncTaskHelper.execute(
+                new Action<Void>() // preExecute
+                {
+                    @Override
+                    public void execute(Void aVoid)
+                    {
+                        supportWidget.toggleStatus(ListViewHelper.Status.LOADING);
+                    }
+                },
+                new Func<String, RssSource>() // doInBackground
+                {
+                    @Override
+                    public RssSource execute(String s)
+                    {
+                        return rssService.parse(s);
+                    }
+                },
+                new Action<AsyncResult<RssSource>>() // postExecute
+                {
+                    @Override
+                    public void execute(AsyncResult<RssSource> result)
+                    {
+                        if (result.isSuccessful())
+                        {
+                            RssSource source = result.getResult();
+                            resultAdapter.clear();
+                            if (source != null)
+                            {
+                                supportWidget.toggleStatus(ListViewHelper.Status.NORMAL);
+                                resultAdapter.add(source);
+                            }
+                            else
+                            {
+                                supportWidget.toggleStatus(ListViewHelper.Status.EMPTY);
+                            }
+                        }
+                    }
+                },
+                text // param
+        );
     }
 
     /**

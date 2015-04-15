@@ -1,6 +1,7 @@
 package assignment.rssviewer.utils;
 
 import android.util.SparseBooleanArray;
+import android.view.View;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -50,5 +51,54 @@ public class ListViewHelper
             }
         }
         return null;
+    }
+
+    public static enum Status
+    {
+        LOADING, EMPTY, NORMAL
+    }
+
+    public static class SupportWidget
+    {
+        private View parent, busyIndicator, emptyText;
+        private ListView listView;
+
+        public SupportWidget(ListView listView, View parent, View busyIndicator, View emptyText)
+        {
+            this.parent = parent;
+            this.busyIndicator = busyIndicator;
+            this.emptyText = emptyText;
+            this.listView = listView;
+        }
+
+        public void toggleStatus(Status status)
+        {
+            switch (status)
+            {
+                case LOADING:
+                    setVisibility(parent, View.VISIBLE);
+                    setVisibility(busyIndicator, View.VISIBLE);
+                    setVisibility(emptyText, View.INVISIBLE);
+                    setVisibility(listView, View.GONE);
+                    break;
+                case EMPTY:
+                    setVisibility(parent, View.VISIBLE);
+                    setVisibility(busyIndicator, View.INVISIBLE);
+                    setVisibility(emptyText, View.VISIBLE);
+                    setVisibility(listView, View.GONE);
+                    break;
+                case NORMAL:
+                    setVisibility(parent, View.GONE);
+                    setVisibility(busyIndicator, View.GONE);
+                    setVisibility(emptyText, View.GONE);
+                    setVisibility(listView, View.VISIBLE);
+            }
+        }
+
+        private void setVisibility(View view, int visibility)
+        {
+            if (view != null)
+                view.setVisibility(visibility);
+        }
     }
 }

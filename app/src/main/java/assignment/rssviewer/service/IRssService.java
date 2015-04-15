@@ -8,5 +8,6 @@ import assignment.rssviewer.model.RssSource;
 public interface IRssService
 {
     public RssSource parse(String url);
-    //public List<Article> parseArticles(List<RssSource> listRssSource);
+
+    public List<Article> parseArticles(List<RssSource> listRssSource);
 }

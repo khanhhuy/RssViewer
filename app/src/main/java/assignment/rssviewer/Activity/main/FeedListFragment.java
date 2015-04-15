@@ -1,5 +1,6 @@
 package assignment.rssviewer.activity.main;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,16 +19,20 @@ import assignment.rssviewer.adapter.PostListAdapter;
 import assignment.rssviewer.model.Article;
 import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.RssParser;
+import assignment.rssviewer.utils.ListViewHelper;
 
 public class FeedListFragment extends BaseMainFragment
 {
     private List<Article> listArticle;
     private PostListAdapter adapter;
+    private ListViewHelper.SupportWidget supportWidget;
 
-    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener()
+    {
 
         @Override
-        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
+        {
             Article article = listArticle.get(arg2);
             Bundle articLink = new Bundle();
             articLink.putString("url", article.getUriString());
@@ -53,10 +58,10 @@ public class FeedListFragment extends BaseMainFragment
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
+        Activity activity = getActivity();
         View view = inflater.inflate(R.layout.fragment_feed_list, container, false);
         listArticle = new ArrayList<>();
-        adapter = new PostListAdapter(getActivity(), R.layout.list_item_feed, listArticle);
-
+        adapter = new PostListAdapter(activity, R.layout.list_item_feed, listArticle);
 
         ListView listView = (ListView) view.findViewById(R.id.postListView);
         if (listView == null)
@@ -64,22 +69,36 @@ public class FeedListFragment extends BaseMainFragment
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(onItemClickListener);
 
+        View busyIndicator = view.findViewById(R.id.busyIndicator);
+        View emptyText = view.findViewById(R.id.emptyText);
+        supportWidget = new ListViewHelper.SupportWidget(listView, null, busyIndicator, emptyText);
+
         //testing rss source Parser.
         final List<RssSource> rssSourceList = new ArrayList<>();
         rssSourceList.add(new RssSource(0L, "Gamespot", "http://www.gamespot.com/feeds/news/", 0));
         rssSourceList.add(new RssSource(0L, "Gamespot", "http://www.theverge.com/rss/index.xml", 0));
-        new AsyncTask<String, Integer, List<Article>>() {
+        new AsyncTask<String, Integer, List<Article>>()
+        {
+            @Override
+            protected void onPreExecute()
+            {
+                supportWidget.toggleStatus(ListViewHelper.Status.LOADING);
+            }
 
             @Override
-            protected List<Article> doInBackground(String... params) {
+            protected List<Article> doInBackground(String... params)
+            {
                 RssParser parser = new RssParser();
                 return parser.parseArticles(rssSourceList);
             }
 
             @Override
-            protected void onPostExecute(List<Article> result) {
-                Log.d("Article List: ", new Integer(result.size()).toString());
-                for (Article article : result) {
+            protected void onPostExecute(List<Article> result)
+            {
+                Log.d("Article List: ", Integer.valueOf(result.size()).toString());
+                supportWidget.toggleStatus(ListViewHelper.Status.NORMAL);
+                for (Article article : result)
+                {
                     listArticle.add(article);
                 }
                 adapter.notifyDataSetChanged();

@@ -1,5 +1,6 @@
 package assignment.rssviewer.activity.main;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -29,6 +30,7 @@ public class MyCollectionFragment extends BaseMainFragment
 {
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
+    private ListViewHelper.SupportWidget supportWidget;
     private ListView lvCategories;
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
@@ -176,11 +178,17 @@ public class MyCollectionFragment extends BaseMainFragment
     {
         thisView = inflater.inflate(R.layout.fragment_my_collection, container, false);
 
-        RssApplication application = (RssApplication) getActivity().getApplication();
+        final Activity activity = getActivity();
+        RssApplication application = (RssApplication) activity.getApplication();
         dataService = application.getDataService();
         lvCategories = (ListView) thisView.findViewById(R.id.lvCategories);
 
-        setIsBusy(true);
+        View parent = activity.findViewById(R.id.supportWidget);
+        View busyIndicator = activity.findViewById(R.id.busyIndicator);
+        View emptyText = activity.findViewById(R.id.emptyText);
+        supportWidget = new ListViewHelper.SupportWidget(lvCategories, parent, busyIndicator, emptyText);
+
+        supportWidget.toggleStatus(ListViewHelper.Status.LOADING);
         dataService.initializeAsync(new Action<AsyncResult<Void>>()
         {
             @Override
@@ -195,10 +203,9 @@ public class MyCollectionFragment extends BaseMainFragment
                         {
                             if (loadResult.isSuccessful())
                             {
-                                categoryAdapter = new CategoryListAdapter(MyCollectionFragment.this.getActivity(),
-                                                                          loadResult.getResult());
+                                categoryAdapter = new CategoryListAdapter(activity, loadResult.getResult());
                                 lvCategories.setAdapter(categoryAdapter);
-                                setIsBusy(false);
+                                supportWidget.toggleStatus(ListViewHelper.Status.NORMAL);
                             }
                         }
                     });

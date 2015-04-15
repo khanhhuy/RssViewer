@@ -1,6 +1,30 @@
-<ListView
-	android:id="@+id/postListView"
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-</ListView>
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	tools:context="assignment.rssviewer.activity.main.FeedListFragment">
+
+	<ListView
+		android:id="@+id/postListView"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+	</ListView>
+
+	<ProgressBar
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		android:id="@+id/busyIndicator"
+		android:visibility="gone"/>
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textIsSelectable="false"
+		android:layout_centerInParent="true"
+		android:text="@string/no_results_text"
+		android:id="@+id/emptyText"
+		android:visibility="gone"/>
+
+</RelativeLayout>

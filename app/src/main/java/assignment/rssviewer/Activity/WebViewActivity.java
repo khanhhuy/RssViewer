@@ -15,31 +15,11 @@ import assignment.rssviewer.R;
 public class WebViewActivity extends Activity
 {
 
-    private String url="";
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_web_view);
-        Bundle bun = getIntent().getExtras();
-        if (bun != null)
-            url = bun.getString("url");
-        openByWebView(url);
-        //openByWebBrowser(url);
-        //WebView myWebView = (WebView)findViewById(R.id.webview);
-        //myWebView.loadUrl("http://www.24h.com.vn/bong-da/tieu-diem-big-5-nha-v31-liverpool-man-city-giuong-co-trang-c48a701176.html");
-    }
+    private String url = "";
 
-    private void openByWebView(String url){
-        WebView myWebView = (WebView)findViewById(R.id.webview);
-        myWebView.loadUrl(url);
-    }
-
-    private void openByWebBrowser(String url){
-        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(i);
-    }
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_web_view, menu);
 
@@ -56,18 +36,46 @@ public class WebViewActivity extends Activity
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_settings)
+        {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_web_view);
+        Bundle bun = getIntent().getExtras();
+        if (bun != null)
+            url = bun.getString("url");
+        openByWebView(url);
+        //openByWebBrowser(url);
+        //WebView myWebView = (WebView)findViewById(R.id.webview);
+        //myWebView.loadUrl("http://www.24h.com.vn/bong-da/tieu-diem-big-5-nha-v31-liverpool-man-city-giuong-co-trang-c48a701176.html");
+    }
+
+    private void openByWebView(String url)
+    {
+        WebView myWebView = (WebView) findViewById(R.id.webview);
+        myWebView.loadUrl(url);
+    }
+
+    private void openByWebBrowser(String url)
+    {
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(i);
     }
 }
 

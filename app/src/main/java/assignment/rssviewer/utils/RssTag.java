@@ -3,13 +3,14 @@ package assignment.rssviewer.utils;
 /**
  * Created by Huy on 4/15/2015.
  */
-public class RssTag {
+public class RssTag
+{
     public static final String RSS_CHANNEL = "channel";
 
     public static final String RSS_DESC = "description";
-    public static final String RSS_BUILDATE = "lastBuildDate";
+    public static final String RSS_BUILD_DATE = "lastBuildDate";
     public static final String RSS_ITEM = "item";
-    public static final String RSS_PUBDATE = "pubDate";
+    public static final String RSS_PUB_DATE = "pubDate";
 
     public static final String ATOM_FEED = "feed";
     public static final String ATOM_SUBTITLE = "subtitle";
