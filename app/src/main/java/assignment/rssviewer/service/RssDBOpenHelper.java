@@ -26,6 +26,7 @@ public class RssDBOpenHelper extends DaoMaster.DevOpenHelper
     {
         super.onCreate(db);
 
+        db.beginTransaction();
         try
         {
             AssetManager assetManager = context.getAssets();
@@ -34,39 +35,48 @@ public class RssDBOpenHelper extends DaoMaster.DevOpenHelper
             CSVReader categoriesReader = new CSVReader(suggestionCategories, ',');
             CSVReader sourcesReader = new CSVReader(suggestionSources, ',');
 
-            db.beginTransaction();
             String[] nextCategory;
             String[] nextSource = sourcesReader.readNext();
             while ((nextCategory = categoriesReader.readNext()) != null)
             {
-                long id = db.insert(CategoryDao.TABLENAME, null, categoryValues(nextCategory[0]));
-                while (Long.parseLong(nextSource[0]) == id)
+                long id = db.insert(SuggestionCategoryDao.TABLENAME, null, categoryValues(nextCategory[0]));
+                while (nextSource != null && Long.parseLong(nextSource[0]) == id)
                 {
-                    db.insert(RssSourceDao.TABLENAME, null, sourceValues(nextSource[1], nextSource[2], id));
+                    db.insert(SuggestionSourceDao.TABLENAME, null, sourceValues(nextSource[1], nextSource[2], id));
                     nextSource = sourcesReader.readNext();
                 }
             }
-            db.endTransaction();
+            db.setTransactionSuccessful();
         }
         catch (Exception ex)
         {
             Log.e("error", "error reading initial data", ex);
         }
+        finally
+        {
+            db.endTransaction();
+        }
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion)
+    {
+        Log.i("greenDAO", "Downgrade schema from version " + oldVersion + " to " + newVersion + " by doing nothing.");
     }
 
     private ContentValues categoryValues(String name)
     {
         ContentValues values = new ContentValues();
-        values.put(CategoryDao.Properties.Name.columnName, name);
+        values.put(SuggestionCategoryDao.Properties.Name.columnName, name);
         return values;
     }
 
     private ContentValues sourceValues(String name, String url, long categoryId)
     {
         ContentValues values = new ContentValues();
-        values.put(RssSourceDao.Properties.Name.columnName, name);
-        values.put(RssSourceDao.Properties.UriString.columnName, url);
-        values.put(RssSourceDao.Properties.CategoryId.columnName, categoryId);
+        values.put(SuggestionSourceDao.Properties.Name.columnName, name);
+        values.put(SuggestionSourceDao.Properties.UrlString.columnName, url);
+        values.put(SuggestionSourceDao.Properties.CategoryId.columnName, categoryId);
         return values;
     }
 }

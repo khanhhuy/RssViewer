@@ -35,7 +35,7 @@ public class FeedListFragment extends BaseMainFragment
         {
             Article article = listArticle.get(arg2);
             Bundle articLink = new Bundle();
-            articLink.putString("url", article.getUriString());
+            articLink.putString("url", article.getUrlString());
 
             Intent postviewIntent = new Intent(getActivity(), WebViewActivity.class);
             postviewIntent.putExtras(articLink);

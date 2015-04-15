@@ -152,7 +152,7 @@ public class EditSourceActivity extends Activity
         rssSource = dataService.loadById(RssSource.class, sourceId);
 
         TextView uriText = (TextView) findViewById(R.id.uriText);
-        uriText.setText(rssSource.getUriString());
+        uriText.setText(rssSource.getUrlString());
 
         titleText = (EditText) findViewById(R.id.titleText);
         titleText.setText(rssSource.getName());

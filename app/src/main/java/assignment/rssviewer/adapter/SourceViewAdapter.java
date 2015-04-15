@@ -35,6 +35,6 @@ public class SourceViewAdapter extends ViewHolderAdapter<RssSource>
         TwoTextHolder tHolder = (TwoTextHolder) holder;
 
         tHolder.text1.setText(item.getName());
-        tHolder.text2.setText(item.getUriString());
+        tHolder.text2.setText(item.getUrlString());
     }
 }

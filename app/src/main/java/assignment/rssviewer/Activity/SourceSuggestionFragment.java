@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.model.RssSource;
+import assignment.rssviewer.service.IDataService;
+import assignment.rssviewer.service.RssApplication;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,6 +21,7 @@ import assignment.rssviewer.model.RssSource;
 public class SourceSuggestionFragment extends Fragment
 {
     private OnFragmentInteractionListener mListener;
+    private IDataService dataService;
 
     public SourceSuggestionFragment()
     {
@@ -30,7 +33,15 @@ public class SourceSuggestionFragment extends Fragment
                              Bundle savedInstanceState)
     {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_source_suggestion, container, false);
+        View view = inflater.inflate(R.layout.fragment_source_suggestion, container, false);
+
+        Activity activity = getActivity();
+        RssApplication application = (RssApplication)activity.getApplication();
+        dataService = application.getDataService();
+
+
+
+        return view;
     }
 
     @Override

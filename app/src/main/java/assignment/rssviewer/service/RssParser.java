@@ -67,7 +67,7 @@ public class RssParser implements IRssService
                         case RssTag.RSS_CHANNEL:
                         case RssTag.ATOM_FEED:
                             rssSource = new RssSource();
-                            rssSource.setUriString(url);
+                            rssSource.setUrlString(url);
                             currentTag = XMLTag.CHANNEL;
                             break;
                         case RssTag.RSSATOM_TITLE:
@@ -133,7 +133,7 @@ public class RssParser implements IRssService
             Article article = null;
             try
             {
-                is = openConnection(source.getUriString());
+                is = openConnection(source.getUrlString());
 
                 if (is == null)
                 {
@@ -180,7 +180,7 @@ public class RssParser implements IRssService
                                 currentTag = XMLTag.LINK;
                                 if ((xpp.getAttributeValue(null, "href") != null) && isAtomEntry)
                                 {
-                                    article.setUriString(xpp.getAttributeValue(null, "href"));
+                                    article.setUrlString(xpp.getAttributeValue(null, "href"));
                                 }
                                 break;
                             case RssTag.RSS_DESC:
@@ -224,7 +224,7 @@ public class RssParser implements IRssService
                                 case LINK:
                                     if (content.length() != 0)
                                     {
-                                        article.setUriString(content);
+                                        article.setUrlString(content);
                                     }
                                     break;
                                 case DESCRIPTION:

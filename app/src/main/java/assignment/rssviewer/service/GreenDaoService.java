@@ -7,8 +7,10 @@ import android.os.AsyncTask;
 import java.util.List;
 
 import assignment.rssviewer.R;
+import assignment.rssviewer.model.Category;
 import assignment.rssviewer.model.DaoMaster;
 import assignment.rssviewer.model.DaoSession;
+import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
 import assignment.rssviewer.utils.SortDescription;
@@ -17,7 +19,7 @@ import de.greenrobot.dao.query.QueryBuilder;
 
 public class GreenDaoService implements IDataService
 {
-    private static final IllegalStateException illegalStateException = new IllegalStateException("There is no session to perform this operation.");
+    //private static final IllegalStateException illegalStateException = new IllegalStateException("There is no session to perform this operation.");
     private final Context context;
     private DaoSession daoSession;
 
@@ -37,7 +39,7 @@ public class GreenDaoService implements IDataService
                 {
                     try
                     {
-                        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, context.getResources().getString(R.string.database_name), null);
+                        RssDBOpenHelper helper = new RssDBOpenHelper(context, context.getResources().getString(R.string.database_name), null);
                         return AsyncResult.FromResult(helper.getWritableDatabase());
                     }
                     catch (Exception e)
@@ -226,6 +228,12 @@ public class GreenDaoService implements IDataService
                         {
                             for (TEntity e : entities)
                             {
+                                if (entityClass == Category.class)
+                                {
+                                    Category category = (Category)e;
+                                    for (RssSource source : category.getRssSources())
+                                        daoSession.delete(source);
+                                }
                                 daoSession.delete(e);
                             }
                         }
