@@ -2,6 +2,8 @@
 <manifest package="assignment.rssviewer"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+	<uses-permission android:name="android.permission.INTERNET" />
+
 	<application
 		android:name=".service.RssApplication"
 		android:allowBackup="true"
@@ -46,6 +48,10 @@
 			<meta-data
 				android:name="android.support.PARENT_ACTIVITY"
 				android:value=".activity.CategoryActivity"/>
+		</activity>
+		<activity
+			android:name=".activity.WebViewActivity"
+			android:label="@string/title_activity_web_view" >
 		</activity>
 	</application>
 
