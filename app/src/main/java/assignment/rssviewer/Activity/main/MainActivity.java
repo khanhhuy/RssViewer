@@ -1,15 +1,14 @@
 package assignment.rssviewer.activity.main;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -24,12 +23,11 @@ import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.DrawerAdapter;
-import assignment.rssviewer.utils.MainFragment;
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends Activity
 {
     private final List<DrawerAdapter.DrawerItem> drawerItems = new ArrayList<>();
-    private final HashMap<String, MainFragment> fragments = new HashMap<>();
+    private final HashMap<String, BaseMainFragment> fragments = new HashMap<>();
     private int currentPos = 0;
     private ActionBarDrawerToggle drawerToggle;
     private ListView lvDrawer;
@@ -81,8 +79,8 @@ public class MainActivity extends ActionBarActivity
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close);
         drawerLayout.setDrawerListener(drawerToggle);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
 
         showFragment(drawerItems.get(0).getFragmentName(), false);
         lvDrawer.setItemChecked(0, true);
@@ -95,9 +93,9 @@ public class MainActivity extends ActionBarActivity
         drawerToggle.syncState();
     }
 
-    private static void initFragments(FragmentActivity activity,
+    private static void initFragments(Activity activity,
                                       List<DrawerAdapter.DrawerItem> drawerItems,
-                                      HashMap<String, MainFragment> fragments,
+                                      HashMap<String, BaseMainFragment> fragments,
                                       boolean clearFirst)
     {
         if (clearFirst)
@@ -108,14 +106,14 @@ public class MainActivity extends ActionBarActivity
 
         Resources resources = activity.getResources();
         TypedArray fragmentClasses = resources.obtainTypedArray(R.array.fragmentClasses);
-        FragmentTransaction frmTx = activity.getSupportFragmentManager().beginTransaction();
+        FragmentTransaction frmTx = activity.getFragmentManager().beginTransaction();
 
         for (int i = 0; i < fragmentClasses.length(); i++)
         {
             try
             {
                 String frmName = fragmentClasses.getString(i);
-                MainFragment fragment = (MainFragment) Fragment.instantiate(activity, frmName);
+                BaseMainFragment fragment = (BaseMainFragment) Fragment.instantiate(activity, frmName);
                 DrawerAdapter.DrawerItem drawerItem = new DrawerAdapter.DrawerItem();
                 drawerItem.setTitle(fragment.getTitle());
                 drawerItem.setIcon(fragment.getIconResource());
@@ -141,10 +139,10 @@ public class MainActivity extends ActionBarActivity
 
     private void showFragment(String frmName, boolean addToBackStack)
     {
-        MainFragment fragment = fragments.get(frmName);
+        BaseMainFragment fragment = fragments.get(frmName);
         if (fragment != null)
         {
-            FragmentTransaction frmTx = getSupportFragmentManager().beginTransaction();
+            android.app.FragmentTransaction frmTx = getFragmentManager().beginTransaction();
             if (!fragment.isStatic())
             {
                 frmTx.add(R.id.content_frame, fragment);
@@ -161,10 +159,10 @@ public class MainActivity extends ActionBarActivity
 
     private void hideFragment(String frmName)
     {
-        MainFragment fragment = fragments.get(frmName);
+        BaseMainFragment fragment = fragments.get(frmName);
         if (fragment != null)
         {
-            FragmentTransaction frmTx = getSupportFragmentManager().beginTransaction();
+            FragmentTransaction frmTx = getFragmentManager().beginTransaction();
             if (fragment.isStatic())
             {
                 frmTx.hide(fragment);

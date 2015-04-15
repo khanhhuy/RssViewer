@@ -1,10 +1,11 @@
 package assignment.rssviewer.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.*;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.List;
@@ -13,7 +14,6 @@ import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.SourceViewAdapter;
 import assignment.rssviewer.adapter.ViewHolderAdapter;
 import assignment.rssviewer.dialog.ConfirmDialog;
-import assignment.rssviewer.dialog.MessageDialog;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.IDataService;
@@ -22,7 +22,7 @@ import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
 import assignment.rssviewer.utils.ListViewHelper;
 
-public class CategoryActivity extends ActionBarActivity
+public class CategoryActivity extends Activity
 {
     public static final String ID_KEY = "id";
     private IDataService dataService;
@@ -153,6 +153,7 @@ public class CategoryActivity extends ActionBarActivity
 
         displayData(categoryId);
         confirmDeletionDialog.setOnClosedListener(confirmDeletionOnClosedListener);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -174,15 +175,15 @@ public class CategoryActivity extends ActionBarActivity
             lvSources.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
             lvSources.setMultiChoiceModeListener(lvSourcesMultiChoiceListener);
 
-/*            lvSources.setOnItemClickListener(new AdapterView.OnItemClickListener()
+            lvSources.setOnItemClickListener(new AdapterView.OnItemClickListener()
             {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id)
                 {
                     RssSource rssSource = sourceAdapter.getItem(position);
-                    editSource(rssSource.getId());
+                    editSource(rssSource);
                 }
-            });*/
+            });
         }
     }
 

@@ -11,10 +11,9 @@ import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.PostListAdapter;
-import assignment.rssviewer.utils.MainFragment;
 import assignment.rssviewer.utils.PostData;
 
-public class FeedListFragment extends MainFragment
+public class FeedListFragment extends BaseMainFragment
 {
     private final List<PostData> listData = new ArrayList<>();
     private PostListAdapter adapter;

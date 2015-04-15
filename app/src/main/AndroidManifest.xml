@@ -21,7 +21,8 @@
 		<activity
 			android:name=".activity.CategoryActivity"
 			android:label="@string/title_activity_category"
-			android:launchMode="singleTop">
+			android:launchMode="singleTop"
+			android:parentActivityName=".activity.main.MainActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW"/>
 			</intent-filter>
@@ -32,14 +33,16 @@
 		</activity>
 		<activity
 			android:name=".activity.EditSourceActivity"
-			android:label="@string/title_activity_edit_source">
+			android:label="@string/title_activity_edit_source"
+			android:parentActivityName=".activity.CategoryActivity">
 			<meta-data
 				android:name="android.support.PARENT_ACTIVITY"
 				android:value=".activity.CategoryActivity"/>
 		</activity>
 		<activity
 			android:name=".activity.AddSourceActivity"
-			android:label="@string/title_activity_add_source">
+			android:label="@string/title_activity_add_source"
+			android:parentActivityName=".activity.CategoryActivity">
 			<meta-data
 				android:name="android.support.PARENT_ACTIVITY"
 				android:value=".activity.CategoryActivity"/>

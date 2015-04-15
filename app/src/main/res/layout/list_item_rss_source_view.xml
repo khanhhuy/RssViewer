@@ -7,7 +7,6 @@
               android:orientation="horizontal"
               android:paddingBottom="3dip"
               android:paddingTop="3dip">
-              <!--android:descendantFocusability="blocksDescendants">-->
 
 	<ImageView
 		android:id="@android:id/icon"
@@ -39,6 +38,6 @@
 			android:layout_marginLeft="5dp"
 			android:layout_marginStart="5dp"
 			android:text="http://rss.source1.com"
-			android:textAppearance="?android:attr/textAppearanceSmall"/>
+			android:textAppearance="?android:attr/textAppearance"/>
 	</LinearLayout>
 </LinearLayout>

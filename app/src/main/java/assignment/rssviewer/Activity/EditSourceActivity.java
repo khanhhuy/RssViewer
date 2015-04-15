@@ -1,5 +1,6 @@
 package assignment.rssviewer.activity;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
@@ -23,7 +24,7 @@ import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
 
-public class EditSourceActivity extends ActionBarActivity
+public class EditSourceActivity extends Activity
 {
     private static final String SOURCE_ID_KEY = "source_id";
 
@@ -174,12 +175,17 @@ public class EditSourceActivity extends ActionBarActivity
                 }
             }
         });
+
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void setEnabled(MenuItem menuItem, boolean value)
     {
-        menuItem.setEnabled(value);
-        menuItem.getIcon().setAlpha(value ? 255 : 130);
+        if (menuItem != null)
+        {
+            menuItem.setEnabled(value);
+            menuItem.getIcon().setAlpha(value ? 255 : 130);
+        }
     }
 
     private void notifyValueChanged()

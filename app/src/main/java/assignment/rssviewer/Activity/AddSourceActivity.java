@@ -2,10 +2,8 @@ package assignment.rssviewer.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
-import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TabHost;
@@ -17,7 +15,7 @@ import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 
-public class AddSourceActivity extends ActionBarActivity
+public class AddSourceActivity extends FragmentActivity
         implements CustomSourceFragment.OnFragmentInteractionListener, SourceSuggestionFragment.OnFragmentInteractionListener
 {
     private static final String ID_KEY = "id";
@@ -30,31 +28,6 @@ public class AddSourceActivity extends ActionBarActivity
         Bundle bundle = new Bundle();
         bundle.putLong(ID_KEY, categoryId);
         return bundle;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_add_source, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
-        {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

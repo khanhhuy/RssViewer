@@ -24,9 +24,8 @@ import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
 import assignment.rssviewer.utils.ListViewHelper;
-import assignment.rssviewer.utils.MainFragment;
 
-public class MyCollectionFragment extends MainFragment
+public class MyCollectionFragment extends BaseMainFragment
 {
     private final EditCategoryDialog editCategoryDialog = new EditCategoryDialog();
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
