@@ -10,17 +10,18 @@ import android.widget.TextView;
 import java.util.List;
 
 import assignment.rssviewer.R;
+import assignment.rssviewer.model.Article;
 import assignment.rssviewer.utils.PostData;
 
 
 /**
  * Created by Huy on 4/1/2015.
  */
-public class PostListAdapter extends ArrayAdapter<PostData>
+public class PostListAdapter extends ArrayAdapter<Article>
 {
-    private final List<PostData> data;
+    private final List<Article> data;
 
-    public PostListAdapter(Context context, int textViewResourceId, List<PostData> objects)
+    public PostListAdapter(Context context, int textViewResourceId, List<Article> objects)
     {
         super(context, textViewResourceId, R.id.postTitleLabel, objects);
         data = objects;
@@ -32,16 +33,13 @@ public class PostListAdapter extends ArrayAdapter<PostData>
         View rowView = super.getView(position, convertView, parent);
 
         ImageView thumbImageView = (ImageView) rowView.findViewById(R.id.imgThumbnail);
-        if (data.get(position).postThumbUrl == null)
-        {
-            thumbImageView.setImageResource(R.drawable.ic_launcher);
-        }
+        thumbImageView.setImageResource(R.drawable.ic_launcher);
 
         TextView postTitleView = (TextView) rowView.findViewById(R.id.postTitleLabel);
-        postTitleView.setText(data.get(position).postTitle);
+        postTitleView.setText(data.get(position).getTitle());
 
         TextView postDateView = (TextView) rowView.findViewById(R.id.postDateLabel);
-        postDateView.setText(data.get(position).postDate);
+        postDateView.setText(data.get(position).getUriString());
 
         return rowView;
     }

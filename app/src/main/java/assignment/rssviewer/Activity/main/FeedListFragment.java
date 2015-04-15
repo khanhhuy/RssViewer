@@ -1,23 +1,43 @@
 package assignment.rssviewer.activity.main;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.*;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import assignment.rssviewer.R;
+import assignment.rssviewer.activity.WebViewActivity;
 import assignment.rssviewer.adapter.PostListAdapter;
+import assignment.rssviewer.model.Article;
+import assignment.rssviewer.model.RssSource;
+import assignment.rssviewer.service.RssParser;
 import assignment.rssviewer.utils.MainFragment;
-import assignment.rssviewer.utils.PostData;
 
 public class FeedListFragment extends MainFragment
 {
-    private final List<PostData> listData = new ArrayList<>();
+    private List<Article> listArticle;
     private PostListAdapter adapter;
+
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+            Article article = listArticle.get(arg2);
+            Bundle articLink = new Bundle();
+            articLink.putString("url", article.getUriString());
+
+            Intent postviewIntent = new Intent(getActivity(), WebViewActivity.class);
+            postviewIntent.putExtras(articLink);
+            startActivity(postviewIntent);
+        }
+    };
 
     public FeedListFragment()
     {
@@ -35,15 +55,37 @@ public class FeedListFragment extends MainFragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_feed_list, container, false);
+        listArticle = new ArrayList<>();
+        adapter = new PostListAdapter(getActivity(), R.layout.list_item_feed, listArticle);
 
-        generateDummyData(listData);
-        adapter = new PostListAdapter(getActivity(), R.layout.list_item_feed, listData);
+
         ListView listView = (ListView) view.findViewById(R.id.postListView);
-
         if (listView == null)
             Log.d("Add new View", "listView is null");
-
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(onItemClickListener);
+
+        //testing rss source Parser.
+        final List<RssSource> rssSourceList = new ArrayList<>();
+        rssSourceList.add(new RssSource(0L, "Gamespot", "http://www.gamespot.com/feeds/news/", 0));
+        rssSourceList.add(new RssSource(0L, "Gamespot", "http://www.theverge.com/rss/index.xml", 0));
+        new AsyncTask<String, Integer, List<Article>>() {
+
+            @Override
+            protected List<Article> doInBackground(String... params) {
+                RssParser parser = new RssParser();
+                return parser.parseArticles(rssSourceList);
+            }
+
+            @Override
+            protected void onPostExecute(List<Article> result) {
+                Log.d("Article List: ", new Integer(result.size()).toString());
+                for (Article article : result) {
+                    listArticle.add(article);
+                }
+                adapter.notifyDataSetChanged();
+            }
+        }.execute();
 
         return view;
     }
@@ -77,25 +119,8 @@ public class FeedListFragment extends MainFragment
         return true;
     }
 
-    /*@Override
-    protected int getChildViewLayout()
-    {
-        return R.layout.fragment_feed_list;
-    }*/
 
-    /*@Override
-    protected void onSetContentView(View rootView) {
-        generateDummyData();
-        adapter = new PostListAdapter(this, R.layout.list_item_feed, listData);
-        ListView listView = (ListView) rootView.findViewById(R.id.postListView);
-
-        if (listView == null)
-            Log.d("Add new View", "listView is null");
-
-        listView.setAdapter(adapter);
-    }*/
-
-    private void generateDummyData(List<PostData> listData)
+    /*private void generateDummyData(List<PostData> listData)
     {
         listData.clear();
 
@@ -109,5 +134,5 @@ public class FeedListFragment extends MainFragment
             data.postThumbUrl = null;
             listData.add(data);
         }
-    }
+    }*/
 }
