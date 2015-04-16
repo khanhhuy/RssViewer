@@ -1,10 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
               android:orientation="vertical"
-              tools:context="assignment.rssviewer.activity.CustomSourceFragment">
-
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
 	<EditText
 		android:id="@+id/searchText"
 		android:layout_width="match_parent"
@@ -16,7 +14,7 @@
 		android:inputType="text"/>
 
 	<ListView
-		android:id="@+id/resultList"
+		android:id="@+id/suggestionCategories"
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
 		android:layout_weight="1"/>
@@ -38,8 +36,9 @@
 			android:layout_height="wrap_content"
 			android:textIsSelectable="false"
 			android:layout_centerInParent="true"
-			android:text="@string/text_no_result"
+			android:text="@string/text_empty_list"
 			android:id="@+id/emptyText"/>
 
 	</RelativeLayout>
+
 </LinearLayout>

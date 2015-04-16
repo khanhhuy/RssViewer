@@ -16,7 +16,7 @@ import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 
 public class AddSourceActivity extends FragmentActivity
-        implements CustomSourceFragment.OnFragmentInteractionListener, SourceSuggestionFragment.OnFragmentInteractionListener
+        implements CustomSourceFragment.OnFragmentInteractionListener, SuggestionFragment.OnFragmentInteractionListener
 {
     private static final String ID_KEY = "id";
     //private FragmentTabHost tabHost;
@@ -49,7 +49,7 @@ public class AddSourceActivity extends FragmentActivity
         tabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
 
         tabHost.addTab(tabHost.newTabSpec("suggestion").setIndicator("Suggestion"),
-                       SourceSuggestionFragment.class, null);
+                       SuggestionFragment.class, null);
 
         tabHost.addTab(tabHost.newTabSpec("add").setIndicator("Add"),
                        CustomSourceFragment.class, null);

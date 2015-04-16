@@ -32,6 +32,9 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_web_view">WebViewActivity</string>
-	<string name="no_results_text">No results</string>
+	<string name="text_no_result">No results</string>
+	<string name="text_empty_list">Empty</string>
+	<string name="text_back">Back</string>
+	<string name="text_add_whole_category">Add this category</string>
 
 </resources>
