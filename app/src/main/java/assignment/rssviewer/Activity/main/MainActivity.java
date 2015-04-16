@@ -30,6 +30,8 @@ public class MainActivity extends ActionBarActivity
 {
     private final List<DrawerAdapter.DrawerItem> drawerItems = new ArrayList<>();
     private final HashMap<String, MainFragment> fragments = new HashMap<>();
+    private HashMap<String, List<String>> listChild;
+
     private int currentPos = 0;
     private ActionBarDrawerToggle drawerToggle;
     private ListView lvDrawer;
@@ -59,6 +61,8 @@ public class MainActivity extends ActionBarActivity
         DrawerAdapter drawerAdapter = new DrawerAdapter(this, drawerItems);
         lvDrawer.setAdapter(drawerAdapter);
         lvDrawer.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+
+        //Expandable List
 
         drawerLayout = (DrawerLayout) findViewById(R.id.basedrawer_layout);
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);

@@ -32,4 +32,10 @@
 		android:divider="@android:color/transparent"
 		android:dividerHeight="0dp"/>
 
+    <ExpandableListView
+        android:id="@+id/lvExpand"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent">
+    </ExpandableListView>
+
 </android.support.v4.widget.DrawerLayout>

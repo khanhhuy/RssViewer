@@ -2,6 +2,8 @@ package assignment.rssviewer.utils;
 
 import android.support.v4.app.Fragment;
 
+import java.util.List;
+
 public abstract class MainFragment extends Fragment
 {
     private String title;
