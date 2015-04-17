@@ -38,6 +38,7 @@
 			android:layout_marginLeft="5dp"
 			android:layout_marginStart="5dp"
 			android:text="http://rss.source1.com"
-			android:textAppearance="?android:attr/textAppearance"/>
+			android:textAppearance="?android:attr/textAppearance"
+			android:singleLine="true"/>
 	</LinearLayout>
 </LinearLayout>

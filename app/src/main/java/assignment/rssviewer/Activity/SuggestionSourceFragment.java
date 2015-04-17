@@ -22,6 +22,7 @@ public class SuggestionSourceFragment extends Fragment
 {
     private static final String ID_KEY = "id";
     private OnFragmentInteractionListener listener;
+    private SuggestionCategory category;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -43,9 +44,20 @@ public class SuggestionSourceFragment extends Fragment
             }
         });
 
+        Button addCategoryButton = (Button) view.findViewById(R.id.addWholeButton);
+        addCategoryButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (listener != null)
+                    listener.onAddCategory(category);
+            }
+        });
+
         Bundle args = getArguments();
         long categoryId = args.getLong(ID_KEY);
-        SuggestionCategory category = dataService.loadById(SuggestionCategory.class, categoryId);
+        category = dataService.loadById(SuggestionCategory.class, categoryId);
 
         ListView lvSources = (ListView) view.findViewById(R.id.lvSources);
         SuggestionSourceAdapter adapter = new SuggestionSourceAdapter(activity, category.getSources(), new Action<SuggestionSource>()
@@ -78,6 +90,6 @@ public class SuggestionSourceFragment extends Fragment
     {
         public void onSourceSelected(SuggestionSource source);
         public void onGoingBack(SuggestionSourceFragment sender);
-        public void onAddCategory();
+        public void onAddCategory(SuggestionCategory category);
     }
 }

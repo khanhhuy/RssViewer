@@ -1,27 +1,35 @@
 package assignment.rssviewer.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTabHost;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TabHost;
 import android.widget.Toast;
+
+import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
+import assignment.rssviewer.utils.SharedDataKey;
 
 public class AddSourceActivity extends FragmentActivity
         implements CustomSourceFragment.OnFragmentInteractionListener, SuggestionFragment.OnFragmentInteractionListener
 {
     private static final String ID_KEY = "id";
-    //private FragmentTabHost tabHost;
+    private static final String SUGGESTION_TAB = "suggestion";
+    private static final String CUSTOM_TAB = "custom";
     private Category currentCategory;
     private IDataService dataService;
+    private SuggestionFragment suggestionFragment;
+    private CustomSourceFragment customFragment;
 
     public static Bundle createArgs(long categoryId)
     {
@@ -34,9 +42,18 @@ public class AddSourceActivity extends FragmentActivity
     public void onSourceSelected(RssSource rssSource)
     {
         rssSource.setCategoryId(currentCategory.getId());
-        dataService.insertAsync(rssSource, null);
+        dataService.insertAsync(RssSource.class, rssSource, null);
         currentCategory.getRssSources().add(rssSource);
         Toast.makeText(this, String.format("Added to %s", currentCategory.getName()), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onCategoryAdded(Category category)
+    {
+        @SuppressWarnings("unchecked")
+        List<Category> mainCategories = (List<Category>) ((RssApplication)getApplication()).getData(SharedDataKey.MAIN_CATEGORIES);
+        mainCategories.add(category);
+        Toast.makeText(this, String.format("Category %s added to collection", category.getName()), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -45,14 +62,27 @@ public class AddSourceActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_source);
 
-        FragmentTabHost tabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
-        tabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
+        TabHost tabHost = (TabHost) findViewById(android.R.id.tabhost);
+        tabHost.setup();
 
-        tabHost.addTab(tabHost.newTabSpec("suggestion").setIndicator("Suggestion"),
-                       SuggestionFragment.class, null);
+        tabHost.addTab(tabHost.newTabSpec(SUGGESTION_TAB)
+                              .setIndicator("Suggestion")
+                              .setContent(new DummyTabContentFactory(this)));
 
-        tabHost.addTab(tabHost.newTabSpec("add").setIndicator("Add"),
-                       CustomSourceFragment.class, null);
+        tabHost.addTab(tabHost.newTabSpec(CUSTOM_TAB)
+                              .setIndicator("Add")
+                              .setContent(new DummyTabContentFactory(this)));
+
+        tabHost.setCurrentTabByTag(SUGGESTION_TAB);
+
+        suggestionFragment = (SuggestionFragment) Fragment.instantiate(this, SuggestionFragment.class.getName());
+        customFragment = (CustomSourceFragment) Fragment.instantiate(this, CustomSourceFragment.class.getName());
+
+        FragmentTransaction frmTx = getSupportFragmentManager().beginTransaction();
+        frmTx.add(android.R.id.tabcontent, suggestionFragment, SUGGESTION_TAB);
+        frmTx.add(android.R.id.tabcontent, customFragment, CUSTOM_TAB);
+        frmTx.hide(customFragment);
+        frmTx.commit();
 
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener()
         {
@@ -60,6 +90,7 @@ public class AddSourceActivity extends FragmentActivity
             public void onTabChanged(String tabId)
             {
                 hideKeyboard(getCurrentFocus());
+                showTabContent(tabId);
             }
         });
 
@@ -68,8 +99,6 @@ public class AddSourceActivity extends FragmentActivity
 
         dataService = ((RssApplication) getApplication()).getDataService();
         currentCategory = dataService.loadById(Category.class, categoryId);
-
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void hideKeyboard(View view)
@@ -78,6 +107,42 @@ public class AddSourceActivity extends FragmentActivity
         {
             InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private void showTabContent(String tabId)
+    {
+        FragmentTransaction frmTx = getSupportFragmentManager().beginTransaction();
+        switch (tabId)
+        {
+            case SUGGESTION_TAB:
+                frmTx.show(suggestionFragment);
+                frmTx.hide(customFragment);
+                break;
+            case CUSTOM_TAB:
+                frmTx.show(customFragment);
+                frmTx.hide(suggestionFragment);
+                break;
+        }
+        frmTx.commit();
+    }
+
+    static class DummyTabContentFactory implements TabHost.TabContentFactory
+    {
+        private Context context;
+
+        private DummyTabContentFactory(Context context)
+        {
+            this.context = context;
+        }
+
+        @Override
+        public View createTabContent(String tag)
+        {
+            View v = new View(context);
+            v.setMinimumWidth(0);
+            v.setMinimumHeight(0);
+            return v;
         }
     }
 }

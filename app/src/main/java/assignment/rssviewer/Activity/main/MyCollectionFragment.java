@@ -25,6 +25,7 @@ import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
 import assignment.rssviewer.utils.ListViewHelper;
+import assignment.rssviewer.utils.SharedDataKey;
 
 public class MyCollectionFragment extends BaseMainFragment
 {
@@ -32,6 +33,7 @@ public class MyCollectionFragment extends BaseMainFragment
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
     private ListViewHelper.SupportWidget supportWidget;
     private ListView lvCategories;
+
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
         @Override
@@ -96,7 +98,7 @@ public class MyCollectionFragment extends BaseMainFragment
             setIsBusy(true);
             final List<Category> selectedCategories = ListViewHelper.getSelectedItems(Category.class, lvCategories);
 
-            dataService.deleteAsync(Category.class, new Action<AsyncResult<Void>>()
+            dataService.deleteAsync(Category.class, selectedCategories, new Action<AsyncResult<Void>>()
             {
                 @Override
                 public void execute(AsyncResult<Void> result)
@@ -108,7 +110,7 @@ public class MyCollectionFragment extends BaseMainFragment
                         setIsBusy(false);
                     }
                 }
-            }, selectedCategories);
+            });
         }
 
         @Override
@@ -130,7 +132,7 @@ public class MyCollectionFragment extends BaseMainFragment
             {
                 category = dataService.loadById(Category.class, id);
                 category.setName(content);
-                dataService.updateAsync(Category.class, null, category);
+                dataService.updateAsync(category, null);
             }
             else
             {
@@ -138,7 +140,7 @@ public class MyCollectionFragment extends BaseMainFragment
                 category = new Category();
                 category.setName(content);
 
-                dataService.insertAsync(category, new Action<AsyncResult<Category>>()
+                dataService.insertAsync(Category.class, category, new Action<AsyncResult<Category>>()
                 {
                     @Override
                     public void execute(AsyncResult<Category> result)
@@ -179,7 +181,7 @@ public class MyCollectionFragment extends BaseMainFragment
         thisView = inflater.inflate(R.layout.fragment_my_collection, container, false);
 
         final Activity activity = getActivity();
-        RssApplication application = (RssApplication) activity.getApplication();
+        final RssApplication application = (RssApplication) activity.getApplication();
         dataService = application.getDataService();
         lvCategories = (ListView) thisView.findViewById(R.id.lvCategories);
 
@@ -192,7 +194,7 @@ public class MyCollectionFragment extends BaseMainFragment
         dataService.initializeAsync(new Action<AsyncResult<Void>>()
         {
             @Override
-            public void execute(AsyncResult<Void> initResult)
+            public void execute(final AsyncResult<Void> initResult)
             {
                 if (initResult.isSuccessful())
                 {
@@ -206,6 +208,7 @@ public class MyCollectionFragment extends BaseMainFragment
                                 categoryAdapter = new CategoryListAdapter(activity, loadResult.getResult());
                                 lvCategories.setAdapter(categoryAdapter);
                                 supportWidget.toggleStatus(ListViewHelper.Status.NORMAL);
+                                application.share(SharedDataKey.MAIN_CATEGORIES, loadResult.getResult());
                             }
                         }
                     });

@@ -3,12 +3,16 @@ package assignment.rssviewer.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.List;
@@ -20,13 +24,61 @@ import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
 import assignment.rssviewer.utils.Action;
 import assignment.rssviewer.utils.AsyncResult;
+import assignment.rssviewer.utils.Func;
 import assignment.rssviewer.utils.ListViewHelper;
 
 public class SuggestionCategoryFragment extends Fragment
 {
     private OnFragmentInteractionListener listener;
     private ListViewHelper.SupportWidget supportWidget;
-    SuggestionCategoryAdapter categoryAdapter;
+    private SuggestionCategoryAdapter categoryAdapter;
+    private final Handler searchHandler = new Handler();
+    private CharSequence searchText;
+
+    private TextWatcher searchTextWatcher = new TextWatcher()
+    {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after)
+        {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count)
+        {
+            searchText = s;
+            searchHandler.removeCallbacks(filterTask);
+            searchHandler.postDelayed(filterTask, 0);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s)
+        {
+
+        }
+    };
+
+    private Runnable filterTask = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            final CharSequence s = searchText;
+            Func<SuggestionCategory, Boolean> filterPredicate = null;
+            if (s != null && s.length() > 0)
+            {
+                filterPredicate = new Func<SuggestionCategory, Boolean>()
+                {
+                    @Override
+                    public Boolean execute(SuggestionCategory category)
+                    {
+                        return category.getName().toLowerCase().startsWith(s.toString().toLowerCase());
+                    }
+                };
+            }
+            categoryAdapter.filter(filterPredicate);
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
@@ -66,6 +118,9 @@ public class SuggestionCategoryFragment extends Fragment
                 listener.onCategorySelected(categoryAdapter.getItem(position));
             }
         });
+
+        EditText searchText = (EditText) view.findViewById(R.id.searchText);
+        searchText.addTextChangedListener(searchTextWatcher);
 
         return view;
     }

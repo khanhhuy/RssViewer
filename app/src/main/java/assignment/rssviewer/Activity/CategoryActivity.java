@@ -93,7 +93,7 @@ public class CategoryActivity extends Activity
         {
             final List<RssSource> selectedSources = ListViewHelper.getSelectedItems(RssSource.class, lvSources);
 
-            dataService.deleteAsync(RssSource.class, new Action<AsyncResult<Void>>()
+            dataService.deleteAsync(RssSource.class, selectedSources, new Action<AsyncResult<Void>>()
             {
                 @Override
                 public void execute(AsyncResult<Void> result)
@@ -104,7 +104,7 @@ public class CategoryActivity extends Activity
                             sourceAdapter.remove(s);
                     }
                 }
-            }, selectedSources);
+            });
         }
 
         @Override

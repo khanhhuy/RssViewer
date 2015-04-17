@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import assignment.rssviewer.R;
@@ -146,7 +148,8 @@ public class GreenDaoService implements IDataService
     }
 
     public <TEntity> AsyncTask<Void, Void, AsyncResult<TEntity>>
-    insertAsync(final TEntity entity,
+    insertAsync(Class<TEntity> entityClass,
+                final TEntity entity,
                 final Action<AsyncResult<TEntity>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<TEntity>>()
@@ -174,6 +177,51 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
+    @Override
+    public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>>
+    insertAsync(Class<TEntity> entityClass,
+                final Iterable<TEntity> entities,
+                final Action<AsyncResult<List<TEntity>>> onCompleted)
+    {
+        return new AsyncTask<Void, Void, AsyncResult<List<TEntity>>>()
+        {
+            @Override
+            protected AsyncResult<List<TEntity>> doInBackground(Void... params)
+            {
+                try
+                {
+                    final List<TEntity> results = new ArrayList<>();
+
+                    daoSession.runInTx(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            for (TEntity entity : entities)
+                            {
+                                daoSession.insert(entity);
+                                results.add(entity);
+                            }
+                        }
+                    });
+
+                    return AsyncResult.FromResult(results);
+                }
+                catch (Exception e)
+                {
+                    return AsyncResult.FromException(e);
+                }
+            }
+
+            @Override
+            protected void onPostExecute(AsyncResult<List<TEntity>> result)
+            {
+                if (onCompleted != null)
+                    onCompleted.execute(result);
+            }
+        }.execute();
+    }
+
     public <TEntity, TKey> TEntity loadById(final Class<TEntity> entityClass, TKey id)
     {
         return daoSession.load(entityClass, id);
@@ -181,8 +229,8 @@ public class GreenDaoService implements IDataService
 
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
     deleteAsync(final Class<TEntity> entityClass,
-                final Action<AsyncResult<Void>> onCompleted,
-                final TEntity entity)
+                final TEntity entity,
+                final Action<AsyncResult<Void>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<Void>>()
         {
@@ -191,6 +239,12 @@ public class GreenDaoService implements IDataService
             {
                 try
                 {
+                    if (entityClass == Category.class)
+                    {
+                        Category category = (Category)entity;
+                        for (RssSource source : category.getRssSources())
+                            daoSession.delete(source);
+                    }
                     daoSession.delete(entity);
                     return AsyncResult.VoidResult();
                 }
@@ -211,8 +265,8 @@ public class GreenDaoService implements IDataService
 
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
     deleteAsync(final Class<TEntity> entityClass,
-                final Action<AsyncResult<Void>> onCompleted,
-                final Iterable<TEntity> entities)
+                final Iterable<TEntity> entities,
+                final Action<AsyncResult<Void>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<Void>>()
         {
@@ -257,9 +311,8 @@ public class GreenDaoService implements IDataService
     }
 
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
-    updateAsync(final Class<TEntity> entityClass,
-                final Action<AsyncResult<Void>> onCompleted,
-                final Iterable<TEntity> entities)
+    updateAsync(final Iterable<TEntity> entities,
+                final Action<AsyncResult<Void>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<Void>>()
         {
@@ -295,9 +348,8 @@ public class GreenDaoService implements IDataService
     }
 
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
-    updateAsync(final Class<TEntity> entityClass,
-                final Action<AsyncResult<Void>> onCompleted,
-                final TEntity entity)
+    updateAsync(final TEntity entity,
+                final Action<AsyncResult<Void>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<Void>>()
         {
