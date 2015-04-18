@@ -22,10 +22,7 @@ import assignment.rssviewer.dialog.EditCategoryDialog;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.service.IDataService;
 import assignment.rssviewer.service.RssApplication;
-import assignment.rssviewer.utils.Action;
-import assignment.rssviewer.utils.AsyncResult;
-import assignment.rssviewer.utils.ListViewHelper;
-import assignment.rssviewer.utils.SharedDataKey;
+import assignment.rssviewer.utils.*;
 
 public class MyCollectionFragment extends BaseMainFragment
 {
@@ -33,6 +30,7 @@ public class MyCollectionFragment extends BaseMainFragment
     private final ConfirmDialog confirmDeletionDialog = new ConfirmDialog();
     private ListViewHelper.SupportWidget supportWidget;
     private ListView lvCategories;
+    private Menu menu;
 
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
@@ -208,7 +206,7 @@ public class MyCollectionFragment extends BaseMainFragment
                                 categoryAdapter = new CategoryListAdapter(activity, loadResult.getResult());
                                 lvCategories.setAdapter(categoryAdapter);
                                 supportWidget.toggleStatus(ListViewHelper.Status.NORMAL);
-                                application.share(SharedDataKey.MAIN_CATEGORIES, loadResult.getResult());
+                                application.share(SharedDataKey.MAIN_CATEGORIES, categoryAdapter);
                             }
                         }
                     });
@@ -239,6 +237,7 @@ public class MyCollectionFragment extends BaseMainFragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
     {
         inflater.inflate(R.menu.menu_collection, menu);
+        this.menu = menu;
         super.onCreateOptionsMenu(menu, inflater);
     }
 
