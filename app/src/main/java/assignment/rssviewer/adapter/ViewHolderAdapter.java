@@ -6,8 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import assignment.rssviewer.utils.Action;
@@ -18,12 +20,15 @@ import assignment.rssviewer.utils.Func;
  *
  * @param <T> Data type for the adapter
  */
-public abstract class ViewHolderAdapter<T> extends ArrayAdapter<T>
+public abstract class ViewHolderAdapter<T> extends BaseAdapter
 {
     protected final LayoutInflater inflater;
     protected final int layoutResource;
-    private List<T> originalList, viewList;
+    private List<T> originalList, displayList;
+    private Func<T, Boolean> filterPredicate;
     private AsyncTask filterTask;
+    private final Object lockObject = new Object();
+    private boolean notifyOnChanged = true;
 
     /**
      * Initializes a ViewHolderAdapter instance.
@@ -34,10 +39,27 @@ public abstract class ViewHolderAdapter<T> extends ArrayAdapter<T>
      */
     public ViewHolderAdapter(Context context, int layoutResource, List<T> objects)
     {
-        super(context, layoutResource, objects);
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.layoutResource = layoutResource;
-        this.viewList = objects;
+        this.displayList = this.originalList = objects;
+    }
+
+    @Override
+    public T getItem(int position)
+    {
+        return displayList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position)
+    {
+        return position;
+    }
+
+    @Override
+    public int getCount()
+    {
+        return displayList.size();
     }
 
     @Override
@@ -50,8 +72,13 @@ public abstract class ViewHolderAdapter<T> extends ArrayAdapter<T>
             convertView.setTag(holder);
         }
 
-        bindView(convertView.getTag(), super.getItem(position));
+        bindView(convertView.getTag(), getItem(position));
         return convertView;
+    }
+
+    public int getPosition(T item)
+    {
+        return displayList.indexOf(item);
     }
 
     public void filter(Func<T, Boolean> predicate)
@@ -64,22 +91,23 @@ public abstract class ViewHolderAdapter<T> extends ArrayAdapter<T>
     {
         if (filterTask != null && filterTask.getStatus() == AsyncTask.Status.RUNNING)
             filterTask.cancel(true);
+        filterPredicate = predicate;
 
-        if (predicate != null)
+        filterTask = new AsyncTask<Void, Void, List<T>>()
         {
-            filterTask = new AsyncTask<Void, Void, List<T>>()
+            @Override
+            protected List<T> doInBackground(Void... params)
             {
-                @Override
-                protected List<T> doInBackground(Void... params)
+                if (predicate != null)
                 {
-                    if (originalList == null)
+                    List<T> values;
+                    synchronized (lockObject)
                     {
-                        originalList = new ArrayList<>(viewList);
+                        values = new ArrayList<>(originalList);
                     }
 
                     List<T> results = new ArrayList<>();
-
-                    for (T item : originalList)
+                    for (T item : values)
                     {
                         if (isCancelled())
                             break;
@@ -89,29 +117,95 @@ public abstract class ViewHolderAdapter<T> extends ArrayAdapter<T>
                             results.add(item);
                         }
                     }
-
                     return results;
                 }
-
-                @Override
-                protected void onPostExecute(List<T> results)
+                else
                 {
-                    if (!isCancelled())
-                    {
-                        ViewHolderAdapter.this.clear();
-                        ViewHolderAdapter.this.addAll(results);
-                        if (callBack != null)
-                            callBack.execute(null);
-                    }
+                    return originalList;
                 }
-            }.execute();
-        }
-        else
+            }
+
+            @Override
+            protected void onPostExecute(List<T> results)
+            {
+                if (!isCancelled())
+                {
+                    displayList = results;
+                    if (results.size() > 0)
+                        notifyDataSetChanged();
+                    else notifyDataSetInvalidated();
+
+                    if (callBack != null)
+                        callBack.execute(null);
+                }
+            }
+        }.execute();
+    }
+
+    public void setNotifyOnChanged(boolean value)
+    {
+        this.notifyOnChanged = value;
+    }
+
+    public void add(T item)
+    {
+        synchronized (lockObject)
         {
-            filterTask = null;
-            this.clear();
-            this.addAll(originalList);
+            originalList.add(item); // if filterPredicate == null -> displayList == originalList
+            if (filterPredicate != null && filterPredicate.execute(item))
+                displayList.add(item);
         }
+        if (notifyOnChanged) notifyDataSetChanged();
+    }
+
+    public void addAll(Collection<? extends T> items)
+    {
+        synchronized (lockObject)
+        {
+            originalList.addAll(items);
+            if (filterPredicate != null)
+            {
+                for (T i : items)
+                {
+                    if (filterPredicate.execute(i))
+                        displayList.add(i);
+                }
+            }
+        }
+        if (notifyOnChanged) notifyDataSetChanged();
+    }
+
+    public void insert(T item, int position)
+    {
+        synchronized (lockObject)
+        {
+            originalList.add(position, item);
+            if (filterPredicate != null && filterPredicate.execute(item))
+                displayList.add(position, item);
+        }
+        if (notifyOnChanged) notifyDataSetChanged();
+    }
+
+    public void remove(T item)
+    {
+        synchronized (lockObject)
+        {
+            originalList.remove(item);
+            if (filterPredicate != null)
+                displayList.remove(item);
+        }
+        if (notifyOnChanged) notifyDataSetChanged();
+    }
+
+    public void clear()
+    {
+        synchronized (lockObject)
+        {
+            originalList.clear();
+            if (filterPredicate != null)
+                displayList.clear();
+        }
+        if (notifyOnChanged) notifyDataSetChanged();
     }
 
     protected abstract Object createHolder(View view, int position);

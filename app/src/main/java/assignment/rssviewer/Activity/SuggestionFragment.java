@@ -92,14 +92,7 @@ public class SuggestionFragment extends Fragment
                             category.getRssSources().add(rssSource);
                         }
 
-                        dataService.insertAsync(RssSource.class, category.getRssSources(), new Action<AsyncResult<List<RssSource>>>()
-                        {
-                            @Override
-                            public void execute(AsyncResult<List<RssSource>> sourceResult)
-                            {
-                                boolean t = sourceResult.isSuccessful();
-                            }
-                        });
+                        dataService.insertAsync(RssSource.class, category.getRssSources(), null);
 
                         if (listener != null)
                             listener.onCategoryAdded(category);

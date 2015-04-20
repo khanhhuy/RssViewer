@@ -14,6 +14,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import assignment.rssviewer.R;
+import assignment.rssviewer.adapter.CategoryListAdapter;
 import assignment.rssviewer.model.Category;
 import assignment.rssviewer.model.RssSource;
 import assignment.rssviewer.service.IDataService;
@@ -51,9 +52,9 @@ public class AddSourceActivity extends FragmentActivity
     public void onCategoryAdded(Category category)
     {
         @SuppressWarnings("unchecked")
-        List<Category> mainCategories = (List<Category>) ((RssApplication)getApplication()).getData(SharedDataKey.MAIN_CATEGORIES);
+        CategoryListAdapter mainCategories = (CategoryListAdapter) ((RssApplication)getApplication()).getData(SharedDataKey.MAIN_CATEGORIES);
         mainCategories.add(category);
-        Toast.makeText(this, String.format("Category %s added to collection", category.getName()), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, String.format("Category %s added", category.getName()), Toast.LENGTH_SHORT).show();
     }
 
     @Override
