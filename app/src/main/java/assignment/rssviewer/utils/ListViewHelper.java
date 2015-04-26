@@ -16,7 +16,15 @@ public class ListViewHelper
         if (listView != null)
         {
             SparseBooleanArray checkedPositions = listView.getCheckedItemPositions();
-            for (int i = 0; i < listView.getCount(); i++)
+            int i = 0;
+            while (checkedPositions.valueAt(i))
+            {
+                int pos = checkedPositions.keyAt(i);
+                T item = (T) listView.getAdapter().getItem(pos);
+                selectedItems.add(item);
+                ++i;
+            }
+            /*for (int i = 0; i < checkedPositions.size(); i++)
             {
                 if (checkedPositions.valueAt(i))
                 {
@@ -25,7 +33,7 @@ public class ListViewHelper
                     selectedItems.add(item);
                 }
                 else break;
-            }
+            }*/
         }
 
         return selectedItems;
