@@ -41,10 +41,12 @@ public interface IDataService
                                                                           Iterable<TEntity> entities,
                                                                           Action<AsyncResult<Void>> onCompleted);
 
-    public <TEntity> AsyncTask<Void, Void, AsyncResult<Void>> updateAsync(TEntity entities,
+    public <TEntity> AsyncTask<Void, Void, AsyncResult<Void>> updateAsync(Class<TEntity> entityClass,
+                                                                          TEntity entities,
                                                                           Action<AsyncResult<Void>> onCompleted);
 
-    public <TEntity> AsyncTask<Void, Void, AsyncResult<Void>> updateAsync(Iterable<TEntity> entities,
+    public <TEntity> AsyncTask<Void, Void, AsyncResult<Void>> updateAsync(Class<TEntity> entityClass,
+                                                                          Iterable<TEntity> entities,
                                                                           Action<AsyncResult<Void>> onCompleted);
     /*public void initDatabase();
     public <T> List<T> loadAll(Class<T> entityClass) throws IllegalStateException;

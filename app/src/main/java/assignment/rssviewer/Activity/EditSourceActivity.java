@@ -122,7 +122,7 @@ public class EditSourceActivity extends Activity
 
             if (isChanged)
             {
-                dataService.updateAsync(rssSource, new Action<AsyncResult<Void>>()
+                dataService.updateAsync(RssSource.class, rssSource, new Action<AsyncResult<Void>>()
                 {
                     @Override
                     public void execute(AsyncResult<Void> voidAsyncResult)

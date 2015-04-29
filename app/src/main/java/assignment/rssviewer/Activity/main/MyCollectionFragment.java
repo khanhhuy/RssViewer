@@ -31,6 +31,10 @@ public class MyCollectionFragment extends BaseMainFragment
     private ListViewHelper.SupportWidget supportWidget;
     private ListView lvCategories;
     private Menu menu;
+    private CategoryListAdapter categoryAdapter;
+    private ProgressBar progressBar;
+    private IDataService dataService;
+    private View thisView;
 
     private AbsListView.MultiChoiceModeListener categoriesSelectionListener = new AbsListView.MultiChoiceModeListener()
     {
@@ -87,6 +91,7 @@ public class MyCollectionFragment extends BaseMainFragment
         {
         }
     };
+
     private ConfirmDialog.OnClosedListener confirmDeletionOnClosedListener = new ConfirmDialog.OnClosedListener()
     {
         @Override
@@ -116,10 +121,7 @@ public class MyCollectionFragment extends BaseMainFragment
         {
         }
     };
-    private CategoryListAdapter categoryAdapter;
-    private ProgressBar progressBar;
-    private IDataService dataService;
-    private View thisView;
+
     private EditCategoryDialog.OnClosedListener editCategoryOnClosedListener = new EditCategoryDialog.OnClosedListener()
     {
         @Override
@@ -130,7 +132,7 @@ public class MyCollectionFragment extends BaseMainFragment
             {
                 category = dataService.loadById(Category.class, id);
                 category.setName(content);
-                dataService.updateAsync(category, null);
+                dataService.updateAsync(Category.class, category, null);
             }
             else
             {
@@ -303,52 +305,6 @@ public class MyCollectionFragment extends BaseMainFragment
         Bundle bundle = ConfirmDialog.createArgs("Confirm Deletion", "Are you sure you want to remove these categories?");
         confirmDeletionDialog.setArguments(bundle);
         confirmDeletionDialog.show(getActivity().getFragmentManager(), "confirmDeletionDialog");
-    }
-
-    private Category getFirstSelectedCategory()
-    {
-        if (lvCategories != null)
-        {
-            SparseBooleanArray checkedPositions = lvCategories.getCheckedItemPositions();
-            int pos = -1;
-            for (int i = 0; i < lvCategories.getCount(); i++)
-                if (checkedPositions.get(i))
-                {
-                    pos = i;
-                    break;
-                }
-
-            if (pos >= 0)
-            {
-                return (Category) lvCategories.getAdapter().getItem(pos);
-            }
-        }
-        return null;
-    }
-
-    private Category[] getSelectedCategories()
-    {
-        List<Category> selectedCategories = new ArrayList<>();
-
-        if (lvCategories != null)
-        {
-            SparseBooleanArray checkedPositions = lvCategories.getCheckedItemPositions();
-            for (int i = 0; i < lvCategories.getCount(); i++)
-            {
-                if (checkedPositions.valueAt(i))
-                {
-                    int pos = checkedPositions.keyAt(i);
-                    Category c = (Category) lvCategories.getAdapter().getItem(pos);
-                    selectedCategories.add(c);
-                }
-                else break;
-            }
-        }
-
-        Category[] result = new Category[selectedCategories.size()];
-        result = selectedCategories.toArray(result);
-
-        return result;
     }
 
     private void setIsBusy(boolean value)
