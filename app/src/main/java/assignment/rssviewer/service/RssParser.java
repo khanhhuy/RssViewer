@@ -130,6 +130,7 @@ public class RssParser implements IRssService
 
         for (RssSource source : listRssSource)
         {
+            Log.d("RSS source: ", source.getName());
             Article article = null;
             try
             {

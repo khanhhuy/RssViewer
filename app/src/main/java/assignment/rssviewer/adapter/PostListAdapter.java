@@ -1,6 +1,7 @@
 package assignment.rssviewer.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Random;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.model.Article;
@@ -31,8 +33,9 @@ public class PostListAdapter extends ArrayAdapter<Article>
     {
         View rowView = super.getView(position, convertView, parent);
 
-        ImageView thumbImageView = (ImageView) rowView.findViewById(R.id.imgThumbnail);
-        thumbImageView.setImageResource(R.drawable.ic_launcher);
+        Random rnd = new Random();
+        int color = Color.argb(40, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        rowView.setBackgroundColor(color);
 
         TextView postTitleView = (TextView) rowView.findViewById(R.id.postTitleLabel);
         postTitleView.setText(data.get(position).getTitle());

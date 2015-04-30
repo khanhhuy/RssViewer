@@ -1,5 +1,6 @@
 package assignment.rssviewer.utils;
 
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.ListView;
@@ -18,6 +19,7 @@ public class ListViewHelper
             SparseBooleanArray checkedPositions = listView.getCheckedItemPositions();
             for (int i = 0; i < listView.getCount(); i++)
             {
+                Log.d("Checked Posision", new Integer(i).toString());
                 if (checkedPositions.valueAt(i))
                 {
                     int pos = checkedPositions.keyAt(i);

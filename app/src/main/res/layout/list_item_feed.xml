@@ -9,39 +9,27 @@
                 android:paddingTop="5dp"
 	>
 
-	<ImageView
-		android:id="@+id/imgThumbnail"
-		android:layout_width="60dp"
-		android:layout_height="60dp"
-		android:layout_alignParentLeft="true"
-		android:layout_alignParentStart="true"
-		android:layout_centerVertical="true"
-		android:scaleType="centerCrop"
-		android:src="@drawable/ic_launcher"/>
-
 	<TextView
 		android:id="@+id/postTitleLabel"
-		android:layout_width="0dp"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignParentRight="true"
-		android:layout_alignTop="@id/imgThumbnail"
-		android:layout_toRightOf="@id/imgThumbnail"
 		android:ellipsize="end"
-		android:maxLines="2"
-		android:text="Title will span for maximum in 2 lines"
+		android:maxLines="3"
+		android:text="Title will span for maximum in 3 lines"
 		android:textIsSelectable="false"
-		android:textSize="16sp"
+		android:textSize="20sp"
 		/>
 
 	<TextView
 		android:id="@+id/postDateLabel"
-		android:layout_width="0dp"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignBottom="@id/imgThumbnail"
-		android:layout_alignParentRight="true"
-		android:layout_toRightOf="@id/imgThumbnail"
-		android:maxLines="1"
+        android:maxLines="1"
+        android:paddingTop="10dp"
 		android:text="April 1, 2015"
 		android:textSize="12sp"
-		/>
+        android:layout_below="@+id/postTitleLabel"
+        android:textColor="@color/feed_date_color"
+
+        />
 </RelativeLayout>
