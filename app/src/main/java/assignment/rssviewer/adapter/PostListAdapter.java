@@ -41,7 +41,8 @@ public class PostListAdapter extends ArrayAdapter<Article>
         postTitleView.setText(data.get(position).getTitle());
 
         TextView postDateView = (TextView) rowView.findViewById(R.id.postDateLabel);
-        postDateView.setText(data.get(position).getUrlString());
+        //postDateView.setText(data.get(position).getPublishDate().toString().substring(0, 10));
+        postDateView.setText(data.get(position).getImageUrl());
 
         return rowView;
     }

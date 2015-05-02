@@ -3,6 +3,9 @@ package assignment.rssviewer.service;
 import android.util.Log;
 
 import org.apache.http.ParseException;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -11,8 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import assignment.rssviewer.model.Article;
 import assignment.rssviewer.model.RssSource;
@@ -158,6 +164,7 @@ public class RssParser implements IRssService
                     else if (eventType == XmlPullParser.START_TAG)
                     {
                         String tagName = xpp.getName();
+                        Log.d("Tag name", tagName);
 
                         switch (tagName)
                         {
@@ -186,8 +193,15 @@ public class RssParser implements IRssService
                                 break;
                             case RssTag.RSS_DESC:
                             case RssTag.ATOM_SUMMARY:
-                            case RssTag.ATOM_CONTENT:
-                                currentTag = XMLTag.DESCRIPTION;
+                            case RssTag.RSS_IMAGE_ATOM_CONTENT:
+                                if ((xpp.getAttributeValue(null, "url") != null) && !isAtomEntry)
+                                {
+                                    currentTag = XMLTag.IMAGE;
+                                    article.setImageUrl(xpp.getAttributeValue(null, "url"));
+                                }
+                                else {
+                                    currentTag = XMLTag.DESCRIPTION;
+                                }
                                 break;
                             case RssTag.RSS_PUB_DATE:
                             case RssTag.ATOM_PUBLISHED:
@@ -211,32 +225,37 @@ public class RssParser implements IRssService
                     {
                         String content = xpp.getText();
                         content = content.trim();
-                        Log.d("Content", content);
-                        if (article != null)
+                        //Log.d("Content", content);
+                        if ((article != null) && (content.length() != 0))
                         {
                             switch (currentTag)
                             {
                                 case TITLE:
-                                    if (content.length() != 0)
-                                    {
-                                        article.setTitle(content);
-                                    }
+                                    article.setTitle(content);
                                     break;
                                 case LINK:
-                                    if (content.length() != 0)
-                                    {
-                                        article.setUrlString(content);
-                                    }
+                                    article.setUrlString(content);
                                     break;
                                 case DESCRIPTION:
-                                    if (content.length() != 0)
-                                    {
-                                        article.setDescription(content);
-                                    }
-                                case PUBDATE:
-                                    //Todo
-                                    //Parse date
+                                    article.setDescription(content);
                                     break;
+                                case PUBDATE:
+                                    if (!isAtomEntry) {
+                                        String pattern = "EEE, dd MMM yyyy HH:mm:ss Z";
+                                        SimpleDateFormat format = new SimpleDateFormat(pattern);
+                                        try {
+                                            article.setPublishDate(format.parse(content));
+                                        } catch (java.text.ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    } else
+                                    {
+                                        DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTime();
+                                        DateTime dateTime = dateFormatter.parseDateTime(content);
+                                        article.setPublishDate(dateTime.toDate());
+                                    }
+                                    break;
+
                                 default:
                                     break;
                             }
@@ -291,6 +310,6 @@ public class RssParser implements IRssService
 
     public enum XMLTag
     {
-        CHANNEL, TITLE, LINK, ITEM, PUBDATE, DESCRIPTION, CONTENT, IGNORETAG
+        CHANNEL, TITLE, LINK, ITEM, PUBDATE, DESCRIPTION, CONTENT, IGNORETAG, IMAGE
     }
 }

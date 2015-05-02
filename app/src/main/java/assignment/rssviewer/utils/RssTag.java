@@ -17,7 +17,7 @@ public class RssTag
     public static final String ATOM_UPDATED = "updated";
     public static final String ATOM_ENTRY = "entry";
     public static final String ATOM_SUMMARY = "summary";
-    public static final String ATOM_CONTENT = "content";
+    public static final String RSS_IMAGE_ATOM_CONTENT = "content";
     public static final String ATOM_PUBLISHED = "published";
 
     public static final String RSSATOM_TITLE = "title";
