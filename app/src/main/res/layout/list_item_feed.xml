@@ -8,26 +8,35 @@
                 android:paddingRight="16dp"
                 android:paddingTop="5dp"
 	>
+    
+    <ImageView
+        android:id="@+id/imageThumbnail"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:paddingRight="10dp"
+        />
 
 	<TextView
 		android:id="@+id/postTitleLabel"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/imageThumbnail"
 		android:ellipsize="end"
-		android:maxLines="3"
-		android:text="Title will span for maximum in 3 lines"
+		android:maxLines="2"
+		android:text="Title will span for maximum in 2 lines"
 		android:textIsSelectable="false"
-		android:textSize="20sp"
+		android:textSize="@dimen/feed_list_title_size"
 		/>
 
 	<TextView
 		android:id="@+id/postDateLabel"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/imageThumbnail"
         android:maxLines="1"
         android:paddingTop="10dp"
 		android:text="April 1, 2015"
-		android:textSize="12sp"
+		android:textSize="@dimen/feed_list_date_size"
         android:layout_below="@+id/postTitleLabel"
         android:textColor="@color/feed_date_color"
 

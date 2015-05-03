@@ -3,6 +3,8 @@ package assignment.rssviewer.activity.main;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +14,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,23 +43,27 @@ public class FeedListFragment extends BaseMainFragment {
     //private CategorySwapperAdapter spinnerAdapter;
     //private Spinner categorySpinner;
     private final List<Category> categoryList = new ArrayList<>();
+    private HashMap<String, Bitmap> categoryThumbnail = new HashMap<>();
     private Menu menu;
     private HashMap<String, Category> categoryOption = new HashMap<>();
+    private AsyncTask<String, Integer, List<Article>> rssSourceTask = null;
+    private AsyncTask<Object, Void, Void> rssBitmapTask = null;
 
 
-//    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-//
-//        @Override
-//        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-//            Article article = listArticle.get(arg2);
-//            Bundle articLink = new Bundle();
-//            articLink.putString("url", article.getUrlString());
-//
-//            Intent postviewIntent = new Intent(getActivity(), WebViewActivity.class);
-//            postviewIntent.putExtras(articLink);
-//            startActivity(postviewIntent);
-//        }
-//    };
+
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+            Article article = listArticle.get(arg2);
+            Bundle articLink = new Bundle();
+            articLink.putString("url", article.getUrlString());
+
+            Intent postviewIntent = new Intent(getActivity(), WebViewActivity.class);
+            postviewIntent.putExtras(articLink);
+            startActivity(postviewIntent);
+        }
+    };
 
     public FeedListFragment() {
         this.setTitle("Feed List");
@@ -70,7 +80,7 @@ public class FeedListFragment extends BaseMainFragment {
         Activity activity = getActivity();
         View view = inflater.inflate(R.layout.fragment_feed_list, container, false);
         listArticle = new ArrayList<>();
-        adapter = new PostListAdapter(activity, R.layout.list_item_feed, listArticle);
+        adapter = new PostListAdapter(activity, R.layout.list_item_feed, listArticle, categoryThumbnail);
         categoryList.clear();
 
         ListView listView = (ListView) view.findViewById(R.id.postListView);
@@ -86,7 +96,7 @@ public class FeedListFragment extends BaseMainFragment {
         this.setHasOptionsMenu(true);
 
         //addCategorySpinner(view);
-        //listView.setOnItemClickListener(onItemClickListener);
+        listView.setOnItemClickListener(onItemClickListener);
 
         return view;
     }
@@ -170,32 +180,23 @@ public class FeedListFragment extends BaseMainFragment {
      * Category loaders
      */
 
-    private AdapterView.OnItemSelectedListener categorySelectedListener = new AdapterView.OnItemSelectedListener()
-    {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-        {
-            Category newCategory = (Category) parent.getItemAtPosition(position);
-            Log.d("Category Selected", newCategory.getName());
-            loadRssSource(newCategory);
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent)
-        {
-        }
-    };
+//    private AdapterView.OnItemSelectedListener categorySelectedListener = new AdapterView.OnItemSelectedListener()
+//    {
+//        @Override
+//        public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+//        {
+//            Category newCategory = (Category) parent.getItemAtPosition(position);
+//            Log.d("Category Selected", newCategory.getName());
+//            loadRssSource(newCategory);
+//        }
+//
+//        @Override
+//        public void onNothingSelected(AdapterView<?> parent)
+//        {
+//        }
+//    };
 
     private IDataService dataService;
-//    private void addCategorySpinner(View view) {
-//
-//        categorySpinner = (Spinner) view.findViewById(R.id.categoryFilter);
-//        spinnerAdapter = new CategorySwapperAdapter(getActivity(), R.layout.list_item_category_spinner, categoryList);
-//        categorySpinner.setAdapter(spinnerAdapter);
-//        categorySpinner.setOnItemSelectedListener(categorySelectedListener);
-//        if (categoryList.size() > 0)
-//            loadCategory();
-//    }
 
     private void loadCategory() {
 
@@ -238,9 +239,25 @@ public class FeedListFragment extends BaseMainFragment {
         });
     }
 
+    private void cancelAsyncTask() {
+        if (rssSourceTask != null && !rssSourceTask.isCancelled()){
+            rssSourceTask.cancel(true);
+            Log.d("Cancel", "RSS Source");
+        }
+        if (rssBitmapTask != null && !rssBitmapTask.isCancelled()){
+            rssBitmapTask.cancel(true);
+            Log.d("Cancel", "RSS Bitmap");
+        }
+        categoryThumbnail.clear();
+        listArticle.clear();
+        adapter.notifyDataSetChanged();
+    }
+
     private void loadRssSource(final Category category) {
 
-        new AsyncTask<String, Integer, List<Article>>() {
+        cancelAsyncTask();
+
+        rssSourceTask = new AsyncTask<String, Integer, List<Article>>() {
             @Override
             protected void onPreExecute() {
                 supportWidget.toggleStatus(ListViewHelper.Status.LOADING);
@@ -256,12 +273,93 @@ public class FeedListFragment extends BaseMainFragment {
             protected void onPostExecute(List<Article> result) {
                 Log.d("Article List: ", Integer.valueOf(result.size()).toString());
                 supportWidget.toggleStatus(ListViewHelper.Status.NORMAL);
-                listArticle.clear();
+
                 for (Article article : result) {
                     listArticle.add(article);
                 }
                 adapter.notifyDataSetChanged();
+                loadBitmap();
             }
-        }.execute();
+        };
+
+        rssSourceTask.execute();
+
+
+    }
+
+
+
+    public void loadBitmap() {
+
+        //Need to cancel ansync task
+
+        if (listArticle.size() > 0) {
+
+            rssBitmapTask = new AsyncTask<Object, Void, Void>() {
+                @Override
+                protected Void doInBackground(Object... args) {
+
+                    for (Article article : listArticle) {
+                        final BitmapFactory.Options options = new BitmapFactory.Options();
+                        //options.inSampleSize = calculateInSampleSize(options, 100, 100);
+                        options.inSampleSize = 4;
+
+                        try {
+                            if (article.getImageUrl() != null) {
+                                Bitmap bitmap = BitmapFactory.decodeStream(
+                                        (InputStream) new URL(article.getImageUrl()).getContent(), null, options);
+                                if (bitmap != null)
+                                    categoryThumbnail.put(article.getImageUrl(), bitmap);
+                            }
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void obj) {
+                    adapter.notifyDataSetChanged();
+                }
+            };
+
+            rssBitmapTask.execute();
+        }
+    }
+
+    /**
+     * Google handle bitmap efficiently
+     * @param options
+     * @param reqWidth
+     * @param reqHeight
+     * @return
+     */
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 }
