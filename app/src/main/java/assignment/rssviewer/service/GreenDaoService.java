@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import assignment.rssviewer.R;
@@ -148,7 +147,7 @@ public class GreenDaoService implements IDataService
     }
 
     public <TEntity> AsyncTask<Void, Void, AsyncResult<TEntity>>
-    insertAsync(Class<TEntity> entityClass,
+    insertAsync(final Class<TEntity> entityClass,
                 final TEntity entity,
                 final Action<AsyncResult<TEntity>> onCompleted)
     {
@@ -172,14 +171,16 @@ public class GreenDaoService implements IDataService
             protected void onPostExecute(AsyncResult<TEntity> result)
             {
                 if (onCompleted != null)
+                {
                     onCompleted.execute(result);
+                }
             }
         }.execute();
     }
 
     @Override
     public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>>
-    insertAsync(Class<TEntity> entityClass,
+    insertAsync(final Class<TEntity> entityClass,
                 final Iterable<TEntity> entities,
                 final Action<AsyncResult<List<TEntity>>> onCompleted)
     {
@@ -217,7 +218,9 @@ public class GreenDaoService implements IDataService
             protected void onPostExecute(AsyncResult<List<TEntity>> result)
             {
                 if (onCompleted != null)
+                {
                     onCompleted.execute(result);
+                }
             }
         }.execute();
     }
@@ -241,7 +244,7 @@ public class GreenDaoService implements IDataService
                 {
                     if (entityClass == Category.class)
                     {
-                        Category category = (Category)entity;
+                        Category category = (Category) entity;
                         for (RssSource source : category.getRssSources())
                             daoSession.delete(source);
                     }
@@ -258,7 +261,9 @@ public class GreenDaoService implements IDataService
             protected void onPostExecute(AsyncResult<Void> result)
             {
                 if (onCompleted != null)
+                {
                     onCompleted.execute(result);
+                }
             }
         }.execute();
     }
@@ -284,7 +289,7 @@ public class GreenDaoService implements IDataService
                             {
                                 if (entityClass == Category.class)
                                 {
-                                    Category category = (Category)e;
+                                    Category category = (Category) e;
                                     for (RssSource source : category.getRssSources())
                                         daoSession.delete(source);
                                 }
@@ -305,13 +310,16 @@ public class GreenDaoService implements IDataService
             protected void onPostExecute(AsyncResult<Void> result)
             {
                 if (onCompleted != null)
+                {
                     onCompleted.execute(result);
+                }
             }
         }.execute();
     }
 
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
-    updateAsync(final Iterable<TEntity> entities,
+    updateAsync(final Class<TEntity> entityClass,
+                final Iterable<TEntity> entities,
                 final Action<AsyncResult<Void>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<Void>>()
@@ -342,13 +350,16 @@ public class GreenDaoService implements IDataService
             protected void onPostExecute(AsyncResult<Void> result)
             {
                 if (onCompleted != null)
+                {
                     onCompleted.execute(result);
+                }
             }
         }.execute();
     }
 
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
-    updateAsync(final TEntity entity,
+    updateAsync(final Class<TEntity> entityClass,
+                final TEntity entity,
                 final Action<AsyncResult<Void>> onCompleted)
     {
         return new AsyncTask<Void, Void, AsyncResult<Void>>()
@@ -371,7 +382,9 @@ public class GreenDaoService implements IDataService
             protected void onPostExecute(AsyncResult<Void> result)
             {
                 if (onCompleted != null)
+                {
                     onCompleted.execute(result);
+                }
             }
         }.execute();
     }
