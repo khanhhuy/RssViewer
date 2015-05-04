@@ -40,8 +40,6 @@ public class FeedListFragment extends BaseMainFragment {
     private List<Article> listArticle;
     private PostListAdapter adapter;
     private ListViewHelper.SupportWidget supportWidget;
-    //private CategorySwapperAdapter spinnerAdapter;
-    //private Spinner categorySpinner;
     private final List<Category> categoryList = new ArrayList<>();
     private HashMap<String, Bitmap> categoryThumbnail = new HashMap<>();
     private Menu menu;
@@ -56,11 +54,12 @@ public class FeedListFragment extends BaseMainFragment {
         @Override
         public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
             Article article = listArticle.get(arg2);
-            Bundle articLink = new Bundle();
-            articLink.putString("url", article.getUrlString());
+            Bundle bundle = new Bundle();
+            bundle.putString("url", article.getUrlString());
+            bundle.putString("title", article.getTitle());
 
             Intent postviewIntent = new Intent(getActivity(), WebViewActivity.class);
-            postviewIntent.putExtras(articLink);
+            postviewIntent.putExtras(bundle);
             startActivity(postviewIntent);
         }
     };
@@ -103,8 +102,16 @@ public class FeedListFragment extends BaseMainFragment {
 
     @Override
     public void onResume() {
+        Log.d("onResume", "Feedlist on resume");
         super.onResume();
         loadCategory();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("onDestroy", "destroy feed list fragment");
+        cancelAsyncTask();
+        super.onDestroy();
     }
 
     @Override
@@ -175,26 +182,6 @@ public class FeedListFragment extends BaseMainFragment {
         onPrepareOptionsMenu(menu);
 
     }
-
-    /**
-     * Category loaders
-     */
-
-//    private AdapterView.OnItemSelectedListener categorySelectedListener = new AdapterView.OnItemSelectedListener()
-//    {
-//        @Override
-//        public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-//        {
-//            Category newCategory = (Category) parent.getItemAtPosition(position);
-//            Log.d("Category Selected", newCategory.getName());
-//            loadRssSource(newCategory);
-//        }
-//
-//        @Override
-//        public void onNothingSelected(AdapterView<?> parent)
-//        {
-//        }
-//    };
 
     private IDataService dataService;
 
@@ -291,8 +278,6 @@ public class FeedListFragment extends BaseMainFragment {
 
     public void loadBitmap() {
 
-        //Need to cancel ansync task
-
         if (listArticle.size() > 0) {
 
             rssBitmapTask = new AsyncTask<Object, Void, Void>() {
@@ -301,7 +286,6 @@ public class FeedListFragment extends BaseMainFragment {
 
                     for (Article article : listArticle) {
                         final BitmapFactory.Options options = new BitmapFactory.Options();
-                        //options.inSampleSize = calculateInSampleSize(options, 100, 100);
                         options.inSampleSize = 4;
 
                         try {
@@ -332,34 +316,4 @@ public class FeedListFragment extends BaseMainFragment {
         }
     }
 
-    /**
-     * Google handle bitmap efficiently
-     * @param options
-     * @param reqWidth
-     * @param reqHeight
-     * @return
-     */
-
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
 }

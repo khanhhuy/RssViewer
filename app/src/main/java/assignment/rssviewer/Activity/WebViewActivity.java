@@ -1,5 +1,6 @@
 package assignment.rssviewer.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -58,12 +59,20 @@ public class WebViewActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
         Bundle bun = getIntent().getExtras();
-        if (bun != null)
+
+        String title = null;
+
+        if (bun != null) {
             url = bun.getString("url");
+            title = bun.getString("title");
+        }
         openByWebView(url);
         //openByWebBrowser(url);
         //WebView myWebView = (WebView)findViewById(R.id.webview);
         //myWebView.loadUrl("http://www.24h.com.vn/bong-da/tieu-diem-big-5-nha-v31-liverpool-man-city-giuong-co-trang-c48a701176.html");
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setTitle(title);
     }
 
     private void openByWebView(String url)

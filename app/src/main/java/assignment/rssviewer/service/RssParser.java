@@ -164,7 +164,7 @@ public class RssParser implements IRssService
                     else if (eventType == XmlPullParser.START_TAG)
                     {
                         String tagName = xpp.getName();
-                        Log.d("Tag name", tagName);
+                        //Log.d("Tag name", tagName);
 
                         switch (tagName)
                         {
