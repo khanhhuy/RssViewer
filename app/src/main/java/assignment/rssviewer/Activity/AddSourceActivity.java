@@ -51,9 +51,6 @@ public class AddSourceActivity extends FragmentActivity
     @Override
     public void onCategoryAdded(Category category)
     {
-        @SuppressWarnings("unchecked")
-        CategoryListAdapter mainCategories = (CategoryListAdapter) ((RssApplication)getApplication()).getData(SharedDataKey.MAIN_CATEGORIES);
-        mainCategories.add(category);
         Toast.makeText(this, String.format("Category %s added", category.getName()), Toast.LENGTH_SHORT).show();
     }
 

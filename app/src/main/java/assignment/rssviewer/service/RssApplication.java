@@ -1,14 +1,17 @@
 package assignment.rssviewer.service;
 
 import android.app.Application;
+import android.webkit.MimeTypeMap;
 
 import java.util.HashMap;
+
+import assignment.rssviewer.utils.Action;
+import assignment.rssviewer.utils.AsyncResult;
 
 public class RssApplication extends Application
 {
     private IDataService dataService;
     private IRssService rssService;
-    private HashMap<String, Object> sharedData;
 
     @Override
     public void onCreate()
@@ -16,7 +19,6 @@ public class RssApplication extends Application
         super.onCreate();
         dataService = new GreenDaoService(this);
         rssService = new RssParser();
-        sharedData = new HashMap<>();
     }
 
     public IDataService getDataService()
@@ -29,13 +31,9 @@ public class RssApplication extends Application
         return rssService;
     }
 
-    public void share(String key, Object data)
+    public void reCreateDataServiceAsync(Action<AsyncResult<Void>> onCompleted)
     {
-        sharedData.put(key, data);
-    }
-
-    public Object getData(String key)
-    {
-        return sharedData.get(key);
+        dataService = new GreenDaoService(this);
+        dataService.initializeAsync(onCompleted);
     }
 }

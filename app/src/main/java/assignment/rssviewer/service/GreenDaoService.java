@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import assignment.rssviewer.R;
@@ -20,15 +22,17 @@ import de.greenrobot.dao.query.QueryBuilder;
 
 public class GreenDaoService implements IDataService
 {
-    //private static final IllegalStateException illegalStateException = new IllegalStateException("There is no session to perform this operation.");
     private final Context context;
     private DaoSession daoSession;
+    private final HashMap<Class<?>, List<?>> cachedLists;
 
     public GreenDaoService(Context context)
     {
         this.context = context;
+        this.cachedLists = new HashMap<>();
     }
 
+    @Override
     public void initializeAsync(final Action<AsyncResult<Void>> onCompleted)
     {
         if (daoSession == null)
@@ -74,6 +78,8 @@ public class GreenDaoService implements IDataService
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>>
     loadAllAsync(final Class<TEntity> entityClass,
                  final Action<AsyncResult<List<TEntity>>> onCompleted)
@@ -85,7 +91,13 @@ public class GreenDaoService implements IDataService
             {
                 try
                 {
-                    return AsyncResult.FromResult(daoSession.loadAll(entityClass));
+                    List<TEntity> result =  (List<TEntity>) cachedLists.get(entityClass);
+                    if (result == null)
+                    {
+                        result = daoSession.loadAll(entityClass);
+                        cachedLists.put(entityClass, result);
+                    }
+                    return AsyncResult.FromResult(result);
                 }
                 catch (Exception e)
                 {
@@ -102,10 +114,12 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>>
     loadAllAsync(final Class<TEntity> entityClass,
                  final Action<AsyncResult<List<TEntity>>> onCompleted,
-                 final SortDescription orderBy)
+                 final SortDescription<TEntity> orderBy)
     {
         return new AsyncTask<Void, Void, AsyncResult<List<TEntity>>>()
         {
@@ -114,22 +128,31 @@ public class GreenDaoService implements IDataService
             {
                 try
                 {
-                    @SuppressWarnings("unchecked")
-                    AbstractDao<TEntity, ?> dao = (AbstractDao<TEntity, ?>) daoSession.getDao(entityClass);
-                    QueryBuilder<TEntity> queryBuilder = dao.queryBuilder();
-                    switch (orderBy.getOrder())
+                    List<TEntity> result = (List<TEntity>) cachedLists.get(entityClass);
+                    if (result != null)
                     {
-                        case ASCENDING:
-                            queryBuilder = queryBuilder.orderAsc(orderBy.getProperty());
-                            break;
-                        case DESCENDING:
-                            queryBuilder = queryBuilder.orderDesc(orderBy.getProperty());
-                            break;
-                        default:
-                            return null;
+                        Collections.sort(result, orderBy);
+                    }
+                    else
+                    {
+                        AbstractDao<TEntity, ?> dao = (AbstractDao<TEntity, ?>) daoSession.getDao(entityClass);
+                        QueryBuilder<TEntity> queryBuilder = dao.queryBuilder();
+                        switch (orderBy.getOrder())
+                        {
+                            case ASCENDING:
+                                queryBuilder = queryBuilder.orderAsc(orderBy.getProperty());
+                                break;
+                            case DESCENDING:
+                                queryBuilder = queryBuilder.orderDesc(orderBy.getProperty());
+                                break;
+                            default:
+                                return null;
+                        }
+                        result = queryBuilder.list();
+                        cachedLists.put(entityClass, result);
                     }
 
-                    return AsyncResult.FromResult(queryBuilder.list());
+                    return AsyncResult.FromResult(result);
                 }
                 catch (Exception e)
                 {
@@ -146,6 +169,8 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public <TEntity> AsyncTask<Void, Void, AsyncResult<TEntity>>
     insertAsync(final Class<TEntity> entityClass,
                 final TEntity entity,
@@ -159,6 +184,9 @@ public class GreenDaoService implements IDataService
                 try
                 {
                     daoSession.insert(entity);
+                    List cachedList = cachedLists.get(entityClass);
+                    if (cachedList != null)
+                        cachedList.add(entity);
                     return AsyncResult.FromResult(entity);
                 }
                 catch (Exception e)
@@ -179,6 +207,7 @@ public class GreenDaoService implements IDataService
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>>
     insertAsync(final Class<TEntity> entityClass,
                 final Iterable<TEntity> entities,
@@ -192,6 +221,7 @@ public class GreenDaoService implements IDataService
                 try
                 {
                     final List<TEntity> results = new ArrayList<>();
+                    final List<TEntity> cachedList = (List<TEntity>) cachedLists.get(entityClass);
 
                     daoSession.runInTx(new Runnable()
                     {
@@ -202,6 +232,8 @@ public class GreenDaoService implements IDataService
                             {
                                 daoSession.insert(entity);
                                 results.add(entity);
+                                if (cachedList != null)
+                                    cachedList.add(entity);
                             }
                         }
                     });
@@ -225,11 +257,14 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
+    @Override
     public <TEntity, TKey> TEntity loadById(final Class<TEntity> entityClass, TKey id)
     {
         return daoSession.load(entityClass, id);
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
     deleteAsync(final Class<TEntity> entityClass,
                 final TEntity entity,
@@ -244,11 +279,21 @@ public class GreenDaoService implements IDataService
                 {
                     if (entityClass == Category.class)
                     {
+                        List<RssSource> cachedSources = (List<RssSource>) cachedLists.get(RssSource.class);
                         Category category = (Category) entity;
                         for (RssSource source : category.getRssSources())
+                        {
                             daoSession.delete(source);
+                            if (cachedSources != null)
+                                cachedSources.remove(source);
+                        }
                     }
+
                     daoSession.delete(entity);
+                    List<TEntity> cachedList = (List<TEntity>) cachedLists.get(entityClass);
+                    if (cachedList != null)
+                        cachedList.remove(entity);
+
                     return AsyncResult.VoidResult();
                 }
                 catch (Exception e)
@@ -268,6 +313,8 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
     deleteAsync(final Class<TEntity> entityClass,
                 final Iterable<TEntity> entities,
@@ -280,6 +327,7 @@ public class GreenDaoService implements IDataService
             {
                 try
                 {
+                    final List<TEntity> cachedList = (List<TEntity>) cachedLists.get(entityClass);
                     daoSession.runInTx(new Runnable()
                     {
                         @Override
@@ -289,11 +337,18 @@ public class GreenDaoService implements IDataService
                             {
                                 if (entityClass == Category.class)
                                 {
+                                    List<RssSource> cachedSources = (List<RssSource>) cachedLists.get(RssSource.class);
                                     Category category = (Category) e;
                                     for (RssSource source : category.getRssSources())
+                                    {
                                         daoSession.delete(source);
+                                        if (cachedSources != null)
+                                            cachedSources.remove(source);
+                                    }
                                 }
                                 daoSession.delete(e);
+                                if (cachedList != null)
+                                    cachedList.remove(e);
                             }
                         }
                     });
@@ -317,6 +372,7 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
+    @Override
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
     updateAsync(final Class<TEntity> entityClass,
                 final Iterable<TEntity> entities,
@@ -357,6 +413,7 @@ public class GreenDaoService implements IDataService
         }.execute();
     }
 
+    @Override
     public final <TEntity> AsyncTask<Void, Void, AsyncResult<Void>>
     updateAsync(final Class<TEntity> entityClass,
                 final TEntity entity,
@@ -388,148 +445,4 @@ public class GreenDaoService implements IDataService
             }
         }.execute();
     }
-
-    /*@Override
-    public void initDatabase()
-    {
-        if (daoSession == null)
-        {
-            DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(context, context.getResources().getString(R.string.database_name), null);
-            DaoMaster daoMaster = new DaoMaster(helper.getWritableDatabase());
-            daoSession = daoMaster.newSession();
-        }
-    }
-
-    @Override
-    public <T> List<T> loadAll(Class<T> entityClass) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        return daoSession.loadAll(entityClass);
-    }
-
-    @Override
-    public <T> List<T> loadAll(Class<T> entityClass, SortDescription... orderBy) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        AbstractDao<T, ?> dao = getDao(entityClass);
-        QueryBuilder<T> queryBuilder = dao.queryBuilder();
-
-        for (SortDescription condition : orderBy)
-        {
-            switch (condition.getOrder())
-            {
-                case ASCENDING:
-                    queryBuilder = queryBuilder.orderAsc(condition.getProperty());
-                    break;
-                case DESCENDING:
-                    queryBuilder = queryBuilder.orderDesc(condition.getProperty());
-                    break;
-            }
-        }
-
-        return queryBuilder.list();
-    }
-
-    @Override
-    public <T> void insert(final Iterable<T> entities) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        daoSession.runInTx(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                for (T e : entities)
-                {
-                    daoSession.insert(e);
-                }
-            }
-        });
-    }
-
-    @Override
-    public <T> T insert(T entity) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        daoSession.insert(entity);
-        return entity;
-    }
-
-    @Override
-    public <T, TKey> T loadByKey(Class<T> entityClass, TKey id) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-        return daoSession.load(entityClass, id);
-    }
-
-    @Override
-    public <T> void delete(final Iterable<T> entities) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        daoSession.runInTx(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                for (T e : entities)
-                {
-                    daoSession.delete(e);
-                }
-            }
-        });
-    }
-
-    @Override
-    public <T> void delete(T entity) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        daoSession.delete(entity);
-    }
-
-    @Override
-    public <T> void update(final Iterable<T> entities) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        daoSession.runInTx(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                for (T e : entities)
-                {
-                    daoSession.update(e);
-                }
-            }
-        });
-    }
-
-    @Override
-    public <T> void update(T entity) throws IllegalStateException
-    {
-        if (daoSession == null)
-            throw illegalStateException;
-
-        daoSession.update(entity);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> AbstractDao<T, ?> getDao(Class<T> entityClass)
-    {
-        return (AbstractDao<T, ?>) daoSession.getDao(entityClass);
-    }*/
 }

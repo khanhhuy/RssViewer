@@ -1,11 +1,13 @@
 package assignment.rssviewer.utils;
 
+import java.util.Comparator;
+
 import de.greenrobot.dao.Property;
 
 /**
  * Created by Prozacs on 06/04/2015.
  */
-public class SortDescription
+public abstract class SortDescription<T> implements Comparator<T>
 {
     private Property property;
     private SortOrder order;

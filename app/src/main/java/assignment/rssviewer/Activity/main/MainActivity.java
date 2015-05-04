@@ -3,6 +3,9 @@ package assignment.rssviewer.activity.main;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -17,14 +20,22 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.ErrorDialogFragment;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.drive.Drive;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import assignment.rssviewer.R;
 import assignment.rssviewer.adapter.DrawerAdapter;
+import assignment.rssviewer.dialog.MessageDialog;
 
 public class MainActivity extends Activity
+    implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
 {
     private final List<DrawerAdapter.DrawerItem> drawerItems = new ArrayList<>();
     private final HashMap<String, BaseMainFragment> fragments = new HashMap<>();
@@ -32,6 +43,8 @@ public class MainActivity extends Activity
     private ActionBarDrawerToggle drawerToggle;
     private ListView lvDrawer;
     private DrawerLayout drawerLayout;
+    private GoogleApiClient ggApiClient;
+    private boolean resolvingConnectionError = false;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -84,6 +97,13 @@ public class MainActivity extends Activity
 
         showFragment(drawerItems.get(0).getFragmentName(), false);
         lvDrawer.setItemChecked(0, true);
+
+        ggApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Drive.API)
+                .addScope(Drive.SCOPE_APPFOLDER)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
     }
 
     @Override
@@ -91,6 +111,29 @@ public class MainActivity extends Activity
     {
         super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
+    }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        ggApiClient.connect();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == 1001)
+        {
+            resolvingConnectionError = false;
+            if (resultCode == RESULT_OK)
+            {
+                if (!ggApiClient.isConnecting() && !ggApiClient.isConnected())
+                {
+                    ggApiClient.connect();
+                }
+            }
+        }
     }
 
     private static void initFragments(Activity activity,
@@ -172,6 +215,53 @@ public class MainActivity extends Activity
                 frmTx.remove(fragment);
             }
             frmTx.commit();
+        }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle)
+    {
+        Log.i("connect", "connected to google");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i)
+    {
+        Log.i("connect", "connection suspended with i = " + i);
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult)
+    {
+        if (!resolvingConnectionError)
+        {
+            if (connectionResult.hasResolution())
+            {
+                try
+                {
+                    resolvingConnectionError = true;
+                    connectionResult.startResolutionForResult(this, 1001);
+                }
+                catch (IntentSender.SendIntentException e)
+                {
+                    ggApiClient.connect();
+                }
+            }
+            else
+            {
+                ErrorDialogFragment errorDialog = ErrorDialogFragment.newInstance(
+                        GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 1001),
+                        new DialogInterface.OnCancelListener()
+                        {
+                            @Override
+                            public void onCancel(DialogInterface dialog)
+                            {
+                                resolvingConnectionError = false;
+                            }
+                        });
+                errorDialog.show(this.getFragmentManager(), "error_dialog");
+                resolvingConnectionError = true;
+            }
         }
     }
 }

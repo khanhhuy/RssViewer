@@ -15,7 +15,7 @@
     <string name="title_activity_collection">My Collection</string>
     <string name="title_activity_category">CategoryActivity</string>
     <string name="category_id">id</string>
-    <string name="database_name">rss_db</string>
+
     <string name="drawer_title_allcategory">All</string>
     <string name="drawer_title_library">My Library</string>
     <string name="drawer_title_settings">Settings</string>
@@ -35,5 +35,8 @@
 	<string name="text_empty_list">Empty</string>
 	<string name="text_back">Back</string>
 	<string name="text_add_whole_category">Add this category</string>
+
+	<string name="database_name">rss_db</string>
+	<string name="database_google_drive_name">rss_db</string>
 
 </resources>

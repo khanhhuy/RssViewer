@@ -208,7 +208,6 @@ public class MyCollectionFragment extends BaseMainFragment
                                 categoryAdapter = new CategoryListAdapter(activity, loadResult.getResult());
                                 lvCategories.setAdapter(categoryAdapter);
                                 supportWidget.toggleStatus(ListViewHelper.Status.NORMAL);
-                                application.share(SharedDataKey.MAIN_CATEGORIES, categoryAdapter);
                             }
                         }
                     });

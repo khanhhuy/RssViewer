@@ -21,7 +21,7 @@ public interface IDataService
 
     public <TEntity> AsyncTask<Void, Void, AsyncResult<List<TEntity>>> loadAllAsync(Class<TEntity> entityClass,
                                                                                     Action<AsyncResult<List<TEntity>>> onCompleted,
-                                                                                    SortDescription orderBy);
+                                                                                    SortDescription<TEntity> orderBy);
 
     public <TEntity> AsyncTask<Void, Void, AsyncResult<TEntity>> insertAsync(Class<TEntity> entityClass,
                                                                              TEntity entity,
@@ -48,14 +48,4 @@ public interface IDataService
     public <TEntity> AsyncTask<Void, Void, AsyncResult<Void>> updateAsync(Class<TEntity> entityClass,
                                                                           Iterable<TEntity> entities,
                                                                           Action<AsyncResult<Void>> onCompleted);
-    /*public void initDatabase();
-    public <T> List<T> loadAll(Class<T> entityClass) throws IllegalStateException;
-    public <T> List<T> loadAll(Class<T> entityClass, SortDescription... orderBy) throws IllegalStateException;
-    public <T> void insert(Iterable<T> entities) throws IllegalStateException;
-    public <T> T insert(T entity) throws IllegalStateException;
-    public <T, TKey> T loadByKey(Class<T> entityClass, TKey id) throws IllegalStateException;
-    public <T> void delete(Iterable<T> entities) throws IllegalStateException;
-    public <T> void delete(T entity) throws IllegalStateException;
-    public <T> void update(Iterable<T> entity) throws IllegalStateException;
-    public <T> void update(T entity) throws IllegalStateException;*/
 }
