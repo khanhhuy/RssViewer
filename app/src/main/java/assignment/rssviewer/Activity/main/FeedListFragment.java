@@ -167,6 +167,11 @@ public class FeedListFragment extends BaseMainFragment {
             menuItem.setTitle(categoryOption.get(header).getName());
 
             Menu subMenu = menu.getItem(0).getSubMenu();
+            if (subMenu == null) {
+                Log.d("Submenu", "Null");
+                return;
+            }
+
             subMenu.clear();
 
             int i = 1;
@@ -211,10 +216,8 @@ public class FeedListFragment extends BaseMainFragment {
                                     categoryOption.put(category.getName(), category);
                                 }
                                 if (categoryList.size() > 0) {
-                                    //spinnerAdapter.notifyDataSetChanged();
 
                                     recreateCategoryFilter(categoryList.get(0).getName());
-
                                     loadRssSource(categoryList.get(0));
                                     Log.d("Category size", new Integer(categoryList.size()).toString());
                                 }
@@ -224,6 +227,8 @@ public class FeedListFragment extends BaseMainFragment {
                 }
             }
         });
+
+        Log.d("Category size", "load category completed");
     }
 
     private void cancelAsyncTask() {
@@ -238,6 +243,7 @@ public class FeedListFragment extends BaseMainFragment {
         categoryThumbnail.clear();
         listArticle.clear();
         adapter.notifyDataSetChanged();
+        Log.d("Cancel", "Cancel asyncTask completet");
     }
 
     private void loadRssSource(final Category category) {

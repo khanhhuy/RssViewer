@@ -29,6 +29,8 @@ import assignment.rssviewer.utils.RssTag;
  */
 public class RssParser implements IRssService
 {
+
+    private HttpURLConnection connection;
     public RssParser()
     {
     }
@@ -279,6 +281,8 @@ public class RssParser implements IRssService
         }
         Log.d("debug", "Parsing RSS Articles done");
 
+        connection.disconnect();
+
         return articleList;
     }
 
@@ -289,7 +293,7 @@ public class RssParser implements IRssService
         try
         {
             URL url = new URL(stringUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setReadTimeout(10 * 1000);
             connection.setConnectTimeout(10 * 1000);
             connection.setRequestMethod("GET");
@@ -298,7 +302,7 @@ public class RssParser implements IRssService
             int response = connection.getResponseCode();
             Log.d("debug", "The response is: " + response);
             is = connection.getInputStream();
-            //connection.disconnect();
+
         }
         catch (IOException e)
         {
