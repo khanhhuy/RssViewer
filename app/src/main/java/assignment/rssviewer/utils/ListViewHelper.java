@@ -1,5 +1,6 @@
 package assignment.rssviewer.utils;
 
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.ListView;
@@ -17,25 +18,22 @@ public class ListViewHelper
         {
             SparseBooleanArray checkedPositions = listView.getCheckedItemPositions();
             int i = 0;
-            while (checkedPositions.valueAt(i))
+            try
             {
-                int pos = checkedPositions.keyAt(i++);
-                if (pos >= 0 && pos < listView.getCount())
+                while (checkedPositions.valueAt(i))
                 {
-                    T item = (T) listView.getAdapter().getItem(pos);
-                    selectedItems.add(item);
+                    int pos = checkedPositions.keyAt(i++);
+                    if (pos >= 0 && pos < listView.getCount())
+                    {
+                        T item = (T) listView.getAdapter().getItem(pos);
+                        selectedItems.add(item);
+                    }
                 }
             }
-            /*for (int i = 0; i < checkedPositions.size(); i++)
+            catch (IndexOutOfBoundsException ex)
             {
-                if (checkedPositions.valueAt(i))
-                {
-                    int pos = checkedPositions.keyAt(i);
-                    T item = (T) listView.getAdapter().getItem(pos);
-                    selectedItems.add(item);
-                }
-                else break;
-            }*/
+                Log.e("rssviewer", "Reach the end of the array", ex);
+            }
         }
 
         return selectedItems;
