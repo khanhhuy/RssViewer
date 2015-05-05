@@ -19,10 +19,12 @@ public class ListViewHelper
             int i = 0;
             while (checkedPositions.valueAt(i))
             {
-                int pos = checkedPositions.keyAt(i);
-                T item = (T) listView.getAdapter().getItem(pos);
-                selectedItems.add(item);
-                ++i;
+                int pos = checkedPositions.keyAt(i++);
+                if (pos >= 0 && pos < listView.getCount())
+                {
+                    T item = (T) listView.getAdapter().getItem(pos);
+                    selectedItems.add(item);
+                }
             }
             /*for (int i = 0; i < checkedPositions.size(); i++)
             {
