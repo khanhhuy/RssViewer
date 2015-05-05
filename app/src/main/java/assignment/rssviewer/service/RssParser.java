@@ -30,7 +30,7 @@ import assignment.rssviewer.utils.RssTag;
 public class RssParser implements IRssService
 {
 
-    private HttpURLConnection connection;
+    private HttpURLConnection connection = null;
     public RssParser()
     {
     }
@@ -124,6 +124,9 @@ public class RssParser implements IRssService
             e.printStackTrace();
         }
         Log.d("debug", "Parsing RSS Source done");
+
+        if (connection != null)
+            connection.disconnect();
 
         return rssSource;
     }
@@ -252,7 +255,7 @@ public class RssParser implements IRssService
                                         }
                                     } else
                                     {
-                                        DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTime();
+                                        DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
                                         DateTime dateTime = dateFormatter.parseDateTime(content);
                                         article.setPublishDate(dateTime.toDate());
                                     }
@@ -281,7 +284,9 @@ public class RssParser implements IRssService
         }
         Log.d("debug", "Parsing RSS Articles done");
 
-        connection.disconnect();
+        if (connection != null)
+            connection.disconnect();
+
 
         return articleList;
     }
@@ -294,15 +299,14 @@ public class RssParser implements IRssService
         {
             URL url = new URL(stringUrl);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(10 * 1000);
-            connection.setConnectTimeout(10 * 1000);
+            connection.setReadTimeout(5 * 1000);
+            connection.setConnectTimeout(5 * 1000);
             connection.setRequestMethod("GET");
             connection.setDoInput(true);
             connection.connect();
             int response = connection.getResponseCode();
             Log.d("debug", "The response is: " + response);
             is = connection.getInputStream();
-
         }
         catch (IOException e)
         {
